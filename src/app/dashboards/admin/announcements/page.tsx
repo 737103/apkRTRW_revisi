@@ -9,7 +9,7 @@ import { PlusCircle, Trash2, Megaphone, Pencil } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -80,8 +80,15 @@ export default function ManageAnnouncementsPage() {
   const onSubmit = (values: z.infer<typeof announcementSchema>) => {
     try {
       let updatedAnnouncements;
+      const announcementDate = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      
       if (editingAnnouncement) {
-        updatedAnnouncements = announcements.map(a => a.id === editingAnnouncement.id ? { ...editingAnnouncement, ...values } : a);
+        // Keep original date when editing, unless it's missing
+        updatedAnnouncements = announcements.map(a => 
+          a.id === editingAnnouncement.id 
+            ? { ...editingAnnouncement, ...values, date: a.date || announcementDate } 
+            : a
+        );
          toast({
           title: "Pengumuman Diperbarui",
           description: `Pengumuman "${values.title}" berhasil diperbarui.`,
@@ -90,7 +97,7 @@ export default function ManageAnnouncementsPage() {
         const newAnnouncement: Announcement = { 
             ...values, 
             id: `announcement-${new Date().getTime()}`,
-            date: new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+            date: announcementDate
         };
         updatedAnnouncements = [newAnnouncement, ...announcements];
         toast({
@@ -232,10 +239,10 @@ export default function ManageAnnouncementsPage() {
                                     </AlertDialog>
                                 </div>
                             </CardTitle>
-                            <CardDescription>{ann.date}</CardDescription>
+                            <CardDescription>{ann.date || 'Tanggal tidak tersedia'}</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-sm text-foreground">{ann.content}</p>
+                            <p className="text-sm text-foreground whitespace-pre-wrap">{ann.content}</p>
                         </CardContent>
                     </Card>
                 ))}

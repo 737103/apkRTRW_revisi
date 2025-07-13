@@ -81,7 +81,7 @@ export default function UserDashboardPage() {
                                     <div key={ann.id} className="p-4 rounded-lg border bg-muted/30">
                                         <h3 className="font-semibold">{ann.title}</h3>
                                         <p className="text-sm text-muted-foreground mt-1 truncate">{ann.content}</p>
-                                        <p className="text-xs text-muted-foreground/80 mt-2">{ann.date}</p>
+                                        <p className="text-xs text-muted-foreground/80 mt-2">{ann.date || 'Tanggal tidak tersedia'}</p>
                                     </div>
                                 ))}
                             </div>

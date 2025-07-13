@@ -44,7 +44,7 @@ export default function AnnouncementsPage() {
                                 <Megaphone className="h-6 w-6 text-accent mt-1 flex-shrink-0"/>
                                 <div>
                                   <span>{ann.title}</span>
-                                  <CardDescription className="mt-1">{ann.date}</CardDescription>
+                                  <CardDescription className="mt-1">{ann.date || 'Tanggal tidak tersedia'}</CardDescription>
                                 </div>
                             </CardTitle>
                         </CardHeader>
