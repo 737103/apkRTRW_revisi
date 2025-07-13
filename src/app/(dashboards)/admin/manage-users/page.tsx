@@ -11,10 +11,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const formSchema = z.object({
   fullName: z.string().min(3, "Nama lengkap harus diisi."),
-  position: z.string().min(2, "Jabatan harus diisi."),
+  position: z.string({ required_error: "Jabatan harus dipilih." }),
   rt: z.string().optional(),
   rw: z.string().optional(),
   username: z.string().min(3, "Username harus memiliki setidaknya 3 karakter."),
@@ -29,7 +30,7 @@ export default function ManageUsersPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       fullName: "",
-      position: "",
+      position: undefined,
       rt: "",
       rw: "",
       username: "",
@@ -83,9 +84,17 @@ export default function ManageUsersPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Jabatan</FormLabel>
-                      <FormControl>
-                        <Input placeholder="cth., Ketua RT" {...field} />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih Jabatan" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Ketua RT">Ketua RT</SelectItem>
+                          <SelectItem value="Ketua RW">Ketua RW</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
