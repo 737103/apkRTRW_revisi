@@ -302,6 +302,7 @@ export default function ReportSubmissionPage() {
                                         </div>
                                     </FormControl>
                                     <SelectContent>
+                                        <SelectItem value="kerja bakti">Kerja Bakti</SelectItem>
                                         <SelectItem value="posko kontainer">Posko Kontainer</SelectItem>
                                         <SelectItem value="majelis taklim">Majelis Taklim</SelectItem>
                                         <SelectItem value="bank sampah">Bank Sampah</SelectItem>
