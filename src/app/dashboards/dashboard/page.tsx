@@ -1,17 +1,25 @@
+
 'use client';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { FileText, Megaphone } from "lucide-react";
+import { FileText, Megaphone, ArrowRight } from "lucide-react";
 
 const LOGGED_IN_USER_KEY = 'rt-rw-logged-in-user';
 const ANNOUNCEMENTS_STORAGE_KEY = 'rt-rw-announcements';
 
+interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+}
+
 export default function UserDashboardPage() {
     const [userName, setUserName] = useState('');
-    const [announcements, setAnnouncements] = useState([]);
+    const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
     useEffect(() => {
         try {
@@ -23,7 +31,7 @@ export default function UserDashboardPage() {
 
             const storedAnnouncements = localStorage.getItem(ANNOUNCEMENTS_STORAGE_KEY);
             if (storedAnnouncements) {
-                setAnnouncements(JSON.parse(storedAnnouncements).reverse());
+                setAnnouncements(JSON.parse(storedAnnouncements));
             }
         } catch (error) {
             console.error("Failed to load data from localStorage", error);
@@ -56,25 +64,33 @@ export default function UserDashboardPage() {
                             <Megaphone className="h-5 w-5 text-accent" />
                             Pengumuman Terbaru
                         </CardTitle>
-                        <CardDescription>Informasi penting dari pengurus.</CardDescription>
+                         <div className="flex justify-between items-center">
+                            <CardDescription>Informasi penting dari pengurus.</CardDescription>
+                             <Button asChild variant="link" className="p-0 h-auto text-xs">
+                                <Link href="/dashboards/dashboard/announcements">
+                                    Lihat Semua
+                                    <ArrowRight className="ml-1 h-3 w-3" />
+                                </Link>
+                            </Button>
+                        </div>
                     </CardHeader>
                     <CardContent>
                         {announcements.length > 0 ? (
-                            <ul className="space-y-4">
-                                {announcements.slice(0, 3).map((ann: any) => (
-                                    <li key={ann.id} className="p-4 rounded-md bg-muted/50">
+                            <div className="space-y-4">
+                                {announcements.slice(0, 3).map((ann) => (
+                                    <div key={ann.id} className="p-4 rounded-lg border bg-muted/30">
                                         <h3 className="font-semibold">{ann.title}</h3>
-                                        <p className="text-sm text-muted-foreground">{ann.content}</p>
-                                        <p className="text-xs text-muted-foreground mt-2">{ann.date}</p>
-                                    </li>
+                                        <p className="text-sm text-muted-foreground mt-1 truncate">{ann.content}</p>
+                                        <p className="text-xs text-muted-foreground/80 mt-2">{ann.date}</p>
+                                    </div>
                                 ))}
-                            </ul>
+                            </div>
                         ) : (
-                            <p className="text-muted-foreground text-center py-4">Belum ada pengumuman.</p>
+                            <div className="text-center py-8 text-muted-foreground">
+                                <Megaphone className="mx-auto h-8 w-8" />
+                                <p className="mt-2">Belum ada pengumuman.</p>
+                            </div>
                         )}
-                         <Button asChild variant="link" className="px-0 mt-2">
-                            <Link href="/dashboards/dashboard/announcements">Lihat Semua Pengumuman</Link>
-                        </Button>
                     </CardContent>
                 </Card>
             </div>

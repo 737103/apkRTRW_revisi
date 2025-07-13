@@ -38,13 +38,15 @@ export default function AnnouncementsPage() {
         {announcements.length > 0 ? (
             <div className="space-y-4">
                 {announcements.map((ann) => (
-                    <Card key={ann.id} className="shadow-md">
+                    <Card key={ann.id} className="shadow-md hover:shadow-lg transition-shadow">
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Megaphone className="h-5 w-5 text-accent"/>
-                                {ann.title}
+                            <CardTitle className="flex items-start gap-3">
+                                <Megaphone className="h-6 w-6 text-accent mt-1 flex-shrink-0"/>
+                                <div>
+                                  <span>{ann.title}</span>
+                                  <CardDescription className="mt-1">{ann.date}</CardDescription>
+                                </div>
                             </CardTitle>
-                            <CardDescription>{ann.date}</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <p className="text-sm text-foreground whitespace-pre-wrap">{ann.content}</p>
