@@ -20,7 +20,6 @@ export function DashboardSidebar() {
 
   const userLinks = [
     { href: '/dashboards/dashboard/submit-report', label: 'Kirim Laporan', icon: FileText },
-    { href: '/dashboards/dashboard/announcements', label: 'Pengumuman', icon: Megaphone },
     { href: '/dashboards/dashboard/performance-data', label: 'Data Kinerja', icon: BarChart3 },
   ];
   
