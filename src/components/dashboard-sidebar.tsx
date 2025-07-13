@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Users, BarChart2, FileText, Megaphone, Settings, Building, LogOut } from 'lucide-react';
+import { Home, Users, Megaphone, Settings, Building, LogOut, FileText } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
