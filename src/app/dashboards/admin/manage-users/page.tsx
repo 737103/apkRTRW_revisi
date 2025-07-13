@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { PlusCircle, Trash2, UserPlus, Users } from "lucide-react";
+import { PlusCircle, Trash2, UserPlus, Users, Pencil } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,10 +15,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+
 
 const USERS_STORAGE_KEY = 'rt-rw-users';
 
 const userSchema = z.object({
+  id: z.string().optional(),
   fullName: z.string().min(3, { message: "Nama lengkap harus diisi." }),
   username: z.string().min(3, { message: "Username harus diisi." }),
   password: z.string().min(3, { message: "Password minimal 3 karakter." }),
@@ -32,6 +35,7 @@ type User = z.infer<typeof userSchema> & { id: string };
 export default function ManageUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -61,24 +65,59 @@ export default function ManageUsersPage() {
       rw: "",
     },
   });
+  
+  const handleDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setEditingUser(null);
+      form.reset();
+    }
+    setIsDialogOpen(open);
+  }
+
+  const handleEditClick = (user: User) => {
+    setEditingUser(user);
+    form.reset(user);
+    setIsDialogOpen(true);
+  };
+  
+  const handleAddNewClick = () => {
+    setEditingUser(null);
+    form.reset({
+      fullName: "",
+      username: "",
+      password: "",
+      position: undefined,
+      rt: "",
+      rw: "",
+    });
+    setIsDialogOpen(true);
+  }
 
   const onSubmit = (values: z.infer<typeof userSchema>) => {
     try {
-      const newUser: User = { ...values, id: `user-${new Date().getTime()}` };
-      const updatedUsers = [...users, newUser];
+      let updatedUsers;
+      if (editingUser) {
+        updatedUsers = users.map(u => u.id === editingUser.id ? { ...u, ...values } : u);
+         toast({
+          title: "Pengguna Diperbarui",
+          description: `Data untuk "${values.fullName}" berhasil diperbarui.`,
+        });
+      } else {
+        const newUser: User = { ...values, id: `user-${new Date().getTime()}` };
+        updatedUsers = [...users, newUser];
+        toast({
+            title: "Pengguna Ditambahkan",
+            description: `Pengguna "${newUser.fullName}" berhasil dibuat.`,
+        });
+      }
       setUsers(updatedUsers);
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(updatedUsers));
-      toast({
-        title: "Pengguna Ditambahkan",
-        description: `Pengguna "${newUser.fullName}" berhasil dibuat.`,
-      });
-      form.reset();
-      setIsDialogOpen(false);
+      handleDialogOpenChange(false);
     } catch (error) {
       console.error("Failed to save user", error);
       toast({
         title: "Gagal Menyimpan",
-        description: "Terjadi kesalahan saat menambahkan pengguna.",
+        description: "Terjadi kesalahan saat menyimpan data pengguna.",
         variant: "destructive",
       });
     }
@@ -109,20 +148,20 @@ export default function ManageUsersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold tracking-tight">Kelola Pengguna</h1>
-          <p className="text-lg text-muted-foreground">Tambah, lihat, dan hapus data pengguna sistem.</p>
+          <p className="text-lg text-muted-foreground">Tambah, lihat, edit, dan hapus data pengguna sistem.</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Tambah Pengguna
-            </Button>
-          </DialogTrigger>
+         <Button onClick={handleAddNewClick}>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Tambah Pengguna
+        </Button>
+      </div>
+      
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Tambah Pengguna Baru</DialogTitle>
+              <DialogTitle>{editingUser ? 'Edit Pengguna' : 'Tambah Pengguna Baru'}</DialogTitle>
               <DialogDescription>
-                Isi detail pengguna di bawah ini untuk membuat akun baru.
+                 {editingUser ? 'Ubah detail pengguna di bawah ini.' : 'Isi detail pengguna untuk membuat akun baru.'}
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
@@ -160,7 +199,7 @@ export default function ManageUsersPage() {
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="••••••••" {...field} />
+                        <Input type="password" placeholder={editingUser ? "(Kosongkan jika tidak diubah)" : "••••••••"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -172,7 +211,7 @@ export default function ManageUsersPage() {
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Jabatan</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                                 <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Pilih Jabatan" />
@@ -216,13 +255,13 @@ export default function ManageUsersPage() {
                     />
                  </div>
                 <DialogFooter>
-                  <Button type="submit">Simpan Pengguna</Button>
+                  <Button type="button" variant="outline" onClick={() => handleDialogOpenChange(false)}>Batal</Button>
+                  <Button type="submit">Simpan</Button>
                 </DialogFooter>
               </form>
             </Form>
           </DialogContent>
         </Dialog>
-      </div>
 
       <Card className="shadow-lg">
         <CardHeader>
@@ -251,7 +290,21 @@ export default function ManageUsersPage() {
                     <TableCell>{user.username}</TableCell>
                     <TableCell>{user.position}</TableCell>
                     <TableCell>{`RT ${user.rt} / RW ${user.rw}`}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right space-x-2">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                               <Button variant="ghost" size="icon" onClick={() => handleEditClick(user)}>
+                                    <Pencil className="h-4 w-4" />
+                                    <span className="sr-only">Edit</span>
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Edit Pengguna</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
@@ -280,14 +333,10 @@ export default function ManageUsersPage() {
           ) : (
             <div className="text-center py-12 text-muted-foreground">
               <p>Belum ada pengguna terdaftar.</p>
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="link" className="mt-2">
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Tambah Pengguna Pertama
-                    </Button>
-                  </DialogTrigger>
-              </Dialog>
+              <Button variant="link" className="mt-2" onClick={handleAddNewClick}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Tambah Pengguna Pertama
+              </Button>
             </div>
           )}
         </CardContent>
