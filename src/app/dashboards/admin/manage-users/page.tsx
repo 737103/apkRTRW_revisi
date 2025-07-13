@@ -268,7 +268,7 @@ export default function ManageUsersPage() {
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                 <AlertDialogCancel>Batal</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => deleteUser(user.id)} className="bg-destructive hover:bg-destructive/90">Hapus</dlalogAction>
+                                <AlertDialogAction onClick={() => deleteUser(user.id)} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
@@ -280,12 +280,14 @@ export default function ManageUsersPage() {
           ) : (
             <div className="text-center py-12 text-muted-foreground">
               <p>Belum ada pengguna terdaftar.</p>
-              <DialogTrigger asChild>
-                <Button variant="link" className="mt-2">
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Tambah Pengguna Pertama
-                </Button>
-              </DialogTrigger>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="link" className="mt-2">
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Tambah Pengguna Pertama
+                    </Button>
+                  </DialogTrigger>
+              </Dialog>
             </div>
           )}
         </CardContent>
