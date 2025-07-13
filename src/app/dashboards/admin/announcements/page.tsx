@@ -80,7 +80,7 @@ export default function ManageAnnouncementsPage() {
   const onSubmit = (values: z.infer<typeof announcementSchema>) => {
     try {
       let updatedAnnouncements;
-      const announcementDate = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const announcementDate = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
       
       if (editingAnnouncement) {
         // Keep original date when editing, unless it's missing
