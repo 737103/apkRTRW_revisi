@@ -27,59 +27,85 @@ export function LoginForm() {
   // User states
   const [userUsername, setUserUsername] = useState('');
   const [userPassword, setUserPassword] = useState('');
+  
+  const [adminCreds, setAdminCreds] = useState({ username: 'admin', password: '123456' });
 
-  const getAdminCreds = () => {
+  useEffect(() => {
     try {
-      if (typeof window !== 'undefined') {
-        const storedCreds = localStorage.getItem(ADMIN_CREDS_STORAGE_KEY);
-        if (storedCreds) {
-          return JSON.parse(storedCreds);
-        }
+      // Pre-populate admin credentials for demo purposes
+      if (!localStorage.getItem(ADMIN_CREDS_STORAGE_KEY)) {
+        localStorage.setItem(ADMIN_CREDS_STORAGE_KEY, JSON.stringify({ username: 'admin', password: '123456' }));
       }
+      
+      const storedCreds = localStorage.getItem(ADMIN_CREDS_STORAGE_KEY);
+      if (storedCreds) {
+          setAdminCreds(JSON.parse(storedCreds));
+      }
+
+      // Pre-populate a demo user if none exist
+      if (!localStorage.getItem(USERS_STORAGE_KEY)) {
+        const demoUser = {
+          id: 'user-01',
+          username: 'user',
+          password: '123',
+          fullName: 'Budi Santoso',
+          position: 'Ketua RT',
+          rt: '001',
+          rw: '005'
+        };
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify([demoUser]));
+      }
+
     } catch (error) {
-      console.error("Failed to parse admin credentials from localStorage", error);
+      console.error("Failed to initialize credentials from localStorage", error);
     }
-    // Fallback to default credentials
-    return { username: 'admin', password: '123456' };
-  }
+  }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (role === 'admin') {
-      const adminCreds = getAdminCreds();
-      if (adminUsername === adminCreds.username && adminPassword === adminCreds.password) {
-        // Clear any logged in user session
-        localStorage.removeItem(LOGGED_IN_USER_KEY);
-        router.push('/admin/dashboard');
-      } else {
+    try {
+        if (role === 'admin') {
+            if (adminUsername === adminCreds.username && adminPassword === adminCreds.password) {
+                // Clear any logged in user session
+                localStorage.removeItem(LOGGED_IN_USER_KEY);
+                router.push('/dashboards/admin/dashboard');
+            } else {
+                toast({
+                    title: "Login Gagal",
+                    description: "Username atau password admin salah.",
+                    variant: "destructive",
+                })
+            }
+        } else {
+            const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+            if (storedUsers) {
+                const users = JSON.parse(storedUsers);
+                const foundUser = users.find((user: any) => user.username === userUsername && user.password === userPassword);
+                if (foundUser) {
+                    localStorage.setItem(LOGGED_IN_USER_KEY, JSON.stringify(foundUser));
+                    router.push('/dashboards/dashboard');
+                } else {
+                    toast({
+                        title: "Login Gagal",
+                        description: "Username atau password pengguna salah.",
+                        variant: "destructive",
+                    });
+                }
+            } else {
+                toast({
+                    title: "Login Gagal",
+                    description: "Tidak ada pengguna terdaftar. Silakan hubungi admin.",
+                    variant: "destructive",
+                });
+            }
+        }
+    } catch (error) {
+        console.error("Login failed:", error);
         toast({
-            title: "Login Gagal",
-            description: "Username atau password admin salah.",
+            title: "Terjadi Kesalahan",
+            description: "Gagal melakukan login. Silakan coba lagi.",
             variant: "destructive",
-        })
-      }
-    } else {
-      const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
-      if (storedUsers) {
-          const users = JSON.parse(storedUsers);
-          const foundUser = users.find((user: any) => user.username === userUsername && user.password === userPassword);
-          if (foundUser) {
-              localStorage.setItem(LOGGED_IN_USER_KEY, JSON.stringify(foundUser));
-              router.push('/dashboard');
-          } else {
-              toast({
-                  title: "Login Gagal",
-                  description: "Username atau password pengguna salah.",
-                  variant: "destructive",
-              });
-          }
-      } else {
-          toast({
-              title: "Login Gagal",
-              description: "Tidak ada pengguna terdaftar. Silakan hubungi admin.",
-              variant: "destructive",
-          });
-      }
+        });
     }
   };
 
