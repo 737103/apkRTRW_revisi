@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -12,6 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { FileText } from "lucide-react";
+
+const REPORTS_STORAGE_KEY = 'rt-rw-reports';
 
 const formSchema = z.object({
     title: z.string().min(5, {
@@ -39,14 +42,34 @@ export default function ReportSubmissionPage() {
     });
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values);
-        toast({
-            title: "Laporan Berhasil Dikirim!",
-            description: "Laporan kinerja Anda telah dikirim untuk ditinjau.",
-            variant: "default",
-        });
-        form.reset();
-        router.push('/dashboard');
+        try {
+            const storedReports = localStorage.getItem(REPORTS_STORAGE_KEY);
+            const reports = storedReports ? JSON.parse(storedReports) : [];
+            const newReport = {
+                ...values,
+                id: new Date().toISOString(), // Unique ID
+                submissionDate: new Date().toLocaleDateString('id-ID'),
+                // In a real app, you'd get the logged-in user's name
+                submitter: "Pengguna (Demo)", 
+            };
+            reports.push(newReport);
+            localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(reports));
+
+            toast({
+                title: "Laporan Berhasil Dikirim!",
+                description: "Laporan kinerja Anda telah dikirim untuk ditinjau.",
+                variant: "default",
+            });
+            form.reset();
+            router.push('/dashboard');
+        } catch(error) {
+             console.error("Failed to save report to localStorage", error);
+             toast({
+                title: "Gagal Menyimpan Laporan",
+                description: "Terjadi kesalahan saat menyimpan laporan Anda.",
+                variant: "destructive",
+            });
+        }
     }
 
     return (
