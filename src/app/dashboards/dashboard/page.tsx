@@ -59,21 +59,21 @@ export default function UserDashboardPage() {
                     </CardContent>
                 </Card>
                  <Card className="shadow-lg md:col-span-2">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-xl">
-                            <Megaphone className="h-5 w-5 text-accent" />
-                            Pengumuman Terbaru
-                        </CardTitle>
-                         <div className="flex justify-between items-center">
-                            <CardDescription>Informasi penting dari pengurus.</CardDescription>
-                             <Button asChild variant="link" className="p-0 h-auto text-xs">
-                                <Link href="/dashboards/dashboard/announcements">
-                                    Lihat Semua
-                                    <ArrowRight className="ml-1 h-3 w-3" />
-                                </Link>
-                            </Button>
-                        </div>
-                    </CardHeader>
+                    <Link href="/dashboards/dashboard/announcements" className="hover:bg-muted/50 block rounded-t-lg">
+                      <CardHeader>
+                          <CardTitle className="flex items-center gap-2 text-xl">
+                              <Megaphone className="h-5 w-5 text-accent" />
+                              Pengumuman Terbaru
+                          </CardTitle>
+                           <div className="flex justify-between items-center">
+                              <CardDescription>Informasi penting dari pengurus.</CardDescription>
+                               <div className="text-xs text-primary font-semibold flex items-center">
+                                  Lihat Semua
+                                  <ArrowRight className="ml-1 h-3 w-3" />
+                              </div>
+                          </div>
+                      </CardHeader>
+                    </Link>
                     <CardContent>
                         {announcements.length > 0 ? (
                             <div className="space-y-4">
