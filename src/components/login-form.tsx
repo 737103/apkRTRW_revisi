@@ -9,36 +9,73 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from "@/hooks/use-toast";
 
 export function LoginForm() {
   const router = useRouter();
+  const { toast } = useToast();
   const [role, setRole] = useState('user');
+
+  // Admin states
+  const [adminUsername, setAdminUsername] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+
+  // User states
+  const [userUsername, setUserUsername] = useState('');
+  const [userPassword, setUserPassword] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (role === 'admin') {
-      router.push('/admin/dashboard');
+      if (adminUsername === 'admin' && adminPassword === '123456') {
+        router.push('/admin/dashboard');
+      } else {
+        toast({
+            title: "Login Gagal",
+            description: "Username atau password admin salah.",
+            variant: "destructive",
+        })
+      }
     } else {
+      // For now, any user login is accepted
       router.push('/dashboard');
     }
   };
 
-  const renderForm = (role: string) => (
-    <form onSubmit={handleLogin} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor={`${role}-username`}>Username</Label>
-        <Input id={`${role}-username`} type="text" placeholder="Masukkan username Anda" required />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor={`${role}-password`}>Password</Label>
-        <Input id={`${role}-password`} type="password" placeholder="••••••••" required />
-      </div>
-      <Button type="submit" className="w-full">
-        <LogIn className="mr-2 h-4 w-4" />
-        Login as {role.charAt(0).toUpperCase() + role.slice(1)}
-      </Button>
-    </form>
-  )
+  const renderForm = (currentRole: string) => {
+    const isUser = currentRole === 'user';
+    
+    return (
+        <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+                <Label htmlFor={`${currentRole}-username`}>Username</Label>
+                <Input 
+                    id={`${currentRole}-username`} 
+                    type="text" 
+                    placeholder="Masukkan username Anda" 
+                    required 
+                    value={isUser ? userUsername : adminUsername}
+                    onChange={(e) => isUser ? setUserUsername(e.target.value) : setAdminUsername(e.target.value)}
+                />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor={`${currentRole}-password`}>Password</Label>
+                <Input 
+                    id={`${currentRole}-password`} 
+                    type="password" 
+                    placeholder="••••••••" 
+                    required 
+                    value={isUser ? userPassword : adminPassword}
+                    onChange={(e) => isUser ? setUserPassword(e.target.value) : setAdminPassword(e.target.value)}
+                />
+            </div>
+            <Button type="submit" className="w-full">
+                <LogIn className="mr-2 h-4 w-4" />
+                Login as {currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}
+            </Button>
+        </form>
+    )
+  }
 
   return (
     <Card className="w-full max-w-md shadow-2xl">
