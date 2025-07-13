@@ -284,11 +284,14 @@ export default function ReportSubmissionPage() {
                                         </div>
                                     </FormControl>
                                     <SelectContent>
-                                        <SelectItem value="Rapat Koordinasi">Rapat Koordinasi</SelectItem>
-                                        <SelectItem value="Gotong Royong">Gotong Royong</SelectItem>
-                                        <SelectItem value="Kegiatan Sosial">Kegiatan Sosial</SelectItem>
-                                        <SelectItem value="Keamanan Lingkungan">Keamanan Lingkungan</SelectItem>
-                                        <SelectItem value="Lainnya">Lainnya</SelectItem>
+                                        <SelectItem value="posko kontainer">Posko Kontainer</SelectItem>
+                                        <SelectItem value="majelis taklim">Majelis Taklim</SelectItem>
+                                        <SelectItem value="bank sampah">Bank Sampah</SelectItem>
+                                        <SelectItem value="pantau keamanan">Pantau Keamanan</SelectItem>
+                                        <SelectItem value="sigap bencana">Sigap Bencana</SelectItem>
+                                        <SelectItem value="retribusi sampah">Retribusi Sampah</SelectItem>
+                                        <SelectItem value="PBB">PBB</SelectItem>
+                                        <SelectItem value="lainnya">Lainnya</SelectItem>
                                     </SelectContent>
                                     </Select>
                                     <FormMessage />
