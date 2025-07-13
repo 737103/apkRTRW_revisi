@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Camera } from "lucide-react";
+import { FileText, Camera, MapPin } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const REPORTS_STORAGE_KEY = 'rt-rw-reports';
@@ -30,6 +30,7 @@ const formSchema = z.object({
         message: "Deskripsi kegiatan harus memiliki setidaknya 20 karakter.",
     }),
     alamatKegiatan: z.string().min(10, "Alamat kegiatan harus diisi."),
+    lokasiKegiatan: z.string().min(1, "Lokasi kegiatan harus diaktifkan."),
     fotoKegiatan: z.any(),
 });
 
@@ -38,6 +39,7 @@ export default function ReportSubmissionPage() {
     const { toast } = useToast();
     const router = useRouter();
     const [preview, setPreview] = useState<string | null>(null);
+    const [locationError, setLocationError] = useState<string | null>(null);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -50,10 +52,46 @@ export default function ReportSubmissionPage() {
             jamPulang: "",
             deskripsiKegiatan: "",
             alamatKegiatan: "",
+            lokasiKegiatan: "Sedang mengambil lokasi...",
         },
     });
 
     useEffect(() => {
+        // Get GPS Location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    const locationString = `${latitude}, ${longitude}`;
+                    form.setValue('lokasiKegiatan', locationString);
+                    setLocationError(null);
+                },
+                (error) => {
+                    console.error("Error getting location:", error);
+                    let message = "Gagal mendapatkan lokasi. Pastikan GPS dan izin lokasi aktif.";
+                    if (error.code === error.PERMISSION_DENIED) {
+                        message = "Izin lokasi ditolak. Aktifkan di pengaturan browser Anda.";
+                    }
+                    setLocationError(message);
+                    form.setValue('lokasiKegiatan', 'Gagal mendapatkan lokasi');
+                    toast({
+                        title: 'Gagal Mendapatkan Lokasi',
+                        description: message,
+                        variant: 'destructive',
+                    });
+                }
+            );
+        } else {
+             const message = "Geolocation tidak didukung oleh browser ini.";
+             setLocationError(message);
+             form.setValue('lokasiKegiatan', 'Browser tidak mendukung GPS');
+             toast({
+                title: 'GPS Tidak Didukung',
+                description: message,
+                variant: 'destructive',
+            });
+        }
+
         try {
             const loggedInUserStr = localStorage.getItem(LOGGED_IN_USER_KEY);
             if (loggedInUserStr) {
@@ -82,7 +120,7 @@ export default function ReportSubmissionPage() {
         } catch (error) {
             console.error("Failed to get user from localStorage or set time", error);
         }
-    }, [form]);
+    }, [form, toast]);
 
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -258,6 +296,23 @@ export default function ReportSubmissionPage() {
                                                 {...field}
                                             />
                                         </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <FormField
+                                control={form.control}
+                                name="lokasiKegiatan"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Lokasi Kegiatan (GPS)</FormLabel>
+                                        <FormControl>
+                                            <div className="relative">
+                                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                <Input {...field} readOnly className="bg-muted/50 pl-10" />
+                                            </div>
+                                        </FormControl>
+                                        {locationError && <FormDescription className="text-destructive">{locationError}</FormDescription>}
                                         <FormMessage />
                                     </FormItem>
                                 )}
