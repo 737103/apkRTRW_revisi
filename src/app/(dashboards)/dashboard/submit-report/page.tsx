@@ -316,7 +316,7 @@ export default function ReportSubmissionPage() {
                                     name="deskripsiLainnya"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Deskripsi Kegiatan Lainnya</FormLabel>
+                                            <FormLabel>Jelaskan kegiatan lainnya</FormLabel>
                                             <FormControl>
                                                 <Textarea
                                                     placeholder="Jelaskan kegiatan lainnya yang dilakukan..."
