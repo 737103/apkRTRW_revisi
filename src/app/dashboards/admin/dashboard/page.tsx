@@ -178,7 +178,7 @@ export default function AdminDashboardPage() {
                             </DialogDescription>
                           </DialogHeader>
                           <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
-                             <div className="grid grid-cols-2 gap-4">
+                             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                                 <div className="space-y-1">
                                     <p className="text-sm font-medium text-muted-foreground">Jabatan</p>
                                     <p className="font-semibold">{selectedReport.jabatan}</p>
@@ -196,15 +196,15 @@ export default function AdminDashboardPage() {
                                     <p className="font-semibold">{selectedReport.jamPulang}</p>
                                 </div>
                              </div>
-                             <div className="space-y-1">
+                             <div className="space-y-1 mt-4">
                                 <p className="text-sm font-medium text-muted-foreground">Deskripsi Kegiatan</p>
                                 <p>{selectedReport.deskripsiKegiatan}</p>
                             </div>
-                            <div className="space-y-1">
+                            <div className="space-y-1 mt-4">
                                 <p className="text-sm font-medium text-muted-foreground">Alamat Kegiatan</p>
                                 <p>{selectedReport.alamatKegiatan}</p>
                             </div>
-                            <div className="space-y-1">
+                            <div className="space-y-1 mt-4">
                                 <p className="text-sm font-medium text-muted-foreground">Lokasi GPS</p>
                                 <p className="text-sm text-blue-500 hover:underline">
                                   <a href={`https://www.google.com/maps/search/?api=1&query=${selectedReport.lokasiKegiatan}`} target="_blank" rel="noopener noreferrer">
@@ -212,7 +212,7 @@ export default function AdminDashboardPage() {
                                   </a>
                                 </p>
                             </div>
-                             <div className="space-y-1">
+                             <div className="space-y-1 mt-4">
                                 <p className="text-sm font-medium text-muted-foreground">Foto Kegiatan</p>
                                 {selectedReport.fotoKegiatan ? (
                                     <div className="mt-2">
