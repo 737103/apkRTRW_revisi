@@ -22,7 +22,7 @@ const LOGGED_IN_USER_KEY = 'rt-rw-logged-in-user';
 
 const formSchema = z.object({
     namaLengkap: z.string().min(3, "Nama lengkap harus diisi."),
-    jabatan: z.string({ required_error: "Jabatan harus dipilih." }),
+    jabatan: z.string().min(1, "Jabatan harus diisi."),
     jenisKegiatan: z.string({ required_error: "Jenis kegiatan harus dipilih." }),
     deskripsiLainnya: z.string().optional(),
     rt: z.string().min(1, "RT harus diisi."),
@@ -56,7 +56,7 @@ export default function ReportSubmissionPage() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             namaLengkap: "",
-            jabatan: undefined,
+            jabatan: "",
             jenisKegiatan: undefined,
             deskripsiLainnya: "",
             rt: "",
@@ -215,6 +215,19 @@ export default function ReportSubmissionPage() {
                                             <FormLabel>Nama RT/RW</FormLabel>
                                             <FormControl>
                                                 <Input placeholder="cth., Budi Santoso" {...field} readOnly className="bg-muted/50"/>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="jabatan"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Jabatan</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} readOnly className="bg-muted/50"/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
