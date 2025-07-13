@@ -18,12 +18,17 @@ const REPORTS_STORAGE_KEY = 'rt-rw-reports';
 
 interface Report {
   id: string;
-  title: string;
-  period: string;
-  description: string;
-  status: 'Ditinjau' | 'Tertunda';
-  submitter: string; // Assuming we'll store who submitted it
+  namaLengkap: string;
+  rt: string;
+  rw: string;
+  jabatan: string;
+  jamDatang: string;
+  jamPulang: string;
+  deskripsiKegiatan: string;
+  alamatKegiatan: string;
+  fotoKegiatan: string; // Assuming base64 string
   submissionDate: string;
+  status: 'Ditinjau' | 'Tertunda';
 }
 
 export default function AdminDashboardPage() {
@@ -59,9 +64,10 @@ export default function AdminDashboardPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[200px]">Pengirim</TableHead>
-                <TableHead>Judul Laporan</TableHead>
-                <TableHead>Periode</TableHead>
+                <TableHead>Nama Pengirim</TableHead>
+                <TableHead>Jabatan</TableHead>
+                <TableHead>RT/RW</TableHead>
+                <TableHead>Tanggal</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Aksi</TableHead>
               </TableRow>
@@ -69,9 +75,10 @@ export default function AdminDashboardPage() {
             <TableBody>
               {reports.map((report) => (
                 <TableRow key={report.id} className="hover:bg-muted/50">
-                  <TableCell className="font-medium">{report.submitter || "Pengguna Anonim"}</TableCell>
-                  <TableCell>{report.title}</TableCell>
-                  <TableCell>{report.period}</TableCell>
+                  <TableCell className="font-medium">{report.namaLengkap}</TableCell>
+                  <TableCell>{report.jabatan}</TableCell>
+                  <TableCell>{`RT ${report.rt} / RW ${report.rw}`}</TableCell>
+                  <TableCell>{report.submissionDate}</TableCell>
                   <TableCell>
                     <Badge variant={report.status === 'Tertunda' ? 'outline' : 'default'} className={cn(
                         report.status === 'Tertunda' ? 'border-yellow-500/50 text-yellow-600' : 'bg-accent text-accent-foreground'
@@ -90,7 +97,7 @@ export default function AdminDashboardPage() {
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>Lihat Detail</p>
+                          <p>Lihat Detail Laporan</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
