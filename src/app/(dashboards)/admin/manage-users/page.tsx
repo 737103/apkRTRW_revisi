@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +17,8 @@ const formSchema = z.object({
   position: z.string().min(2, "Jabatan harus diisi."),
   rt: z.string().optional(),
   rw: z.string().optional(),
+  username: z.string().min(3, "Username harus memiliki setidaknya 3 karakter."),
+  password: z.string().min(6, "Password harus memiliki setidaknya 6 karakter."),
 });
 
 export default function ManageUsersPage() {
@@ -31,6 +32,8 @@ export default function ManageUsersPage() {
       position: "",
       rt: "",
       rw: "",
+      username: "",
+      password: "",
     },
   });
 
@@ -108,6 +111,32 @@ export default function ManageUsersPage() {
                       <FormLabel>RW</FormLabel>
                       <FormControl>
                         <Input placeholder="cth., 05" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input placeholder="cth., johndoe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="••••••••" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
