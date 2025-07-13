@@ -9,6 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils";
 
 const reports = [
   { id: '1', name: 'John Doe (RT 01)', title: 'Monthly Security Report', date: '2023-10-01', status: 'Reviewed' },
