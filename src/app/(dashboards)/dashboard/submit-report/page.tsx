@@ -15,13 +15,13 @@ import { FileText } from "lucide-react";
 
 const formSchema = z.object({
     title: z.string().min(5, {
-        message: "Title must be at least 5 characters.",
+        message: "Judul harus memiliki setidaknya 5 karakter.",
     }),
     period: z.string().min(2, {
-        message: "Period must be at least 2 characters.",
+        message: "Periode harus memiliki setidaknya 2 karakter.",
     }),
     description: z.string().min(20, {
-        message: "Description must be at least 20 characters.",
+        message: "Deskripsi harus memiliki setidaknya 20 karakter.",
     }),
 });
 
@@ -41,8 +41,8 @@ export default function ReportSubmissionPage() {
     function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values);
         toast({
-            title: "Report Submitted Successfully!",
-            description: "Your performance report has been sent for review.",
+            title: "Laporan Berhasil Dikirim!",
+            description: "Laporan kinerja Anda telah dikirim untuk ditinjau.",
             variant: "default",
         });
         form.reset();
@@ -55,9 +55,9 @@ export default function ReportSubmissionPage() {
                 <CardHeader>
                     <div className="flex items-center gap-3">
                       <FileText className="h-6 w-6 text-primary"/>
-                      <CardTitle className="text-2xl">Submit Performance Report</CardTitle>
+                      <CardTitle className="text-2xl">Kirim Laporan Kinerja</CardTitle>
                     </div>
-                    <CardDescription>Fill out the form below to submit your report. Please be as detailed as possible.</CardDescription>
+                    <CardDescription>Isi formulir di bawah ini untuk mengirimkan laporan Anda. Harap berikan detail selengkap mungkin.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -67,11 +67,11 @@ export default function ReportSubmissionPage() {
                                 name="title"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Report Title</FormLabel>
+                                        <FormLabel>Judul Laporan</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="e.g., Monthly Security Report" {...field} />
+                                            <Input placeholder="cth., Laporan Keamanan Bulanan" {...field} />
                                         </FormControl>
-                                        <FormDescription>A concise title for your report.</FormDescription>
+                                        <FormDescription>Judul yang singkat dan jelas untuk laporan Anda.</FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -81,11 +81,11 @@ export default function ReportSubmissionPage() {
                                 name="period"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Reporting Period</FormLabel>
+                                        <FormLabel>Periode Pelaporan</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="e.g., October 2023" {...field} />
+                                            <Input placeholder="cth., Oktober 2023" {...field} />
                                         </FormControl>
-                                        <FormDescription>The month or quarter this report covers.</FormDescription>
+                                        <FormDescription>Bulan atau kuartal yang dicakup oleh laporan ini.</FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -95,20 +95,20 @@ export default function ReportSubmissionPage() {
                                 name="description"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Detailed Description</FormLabel>
+                                        <FormLabel>Deskripsi Rinci</FormLabel>
                                         <FormControl>
                                             <Textarea
-                                                placeholder="Describe the activities, achievements, and challenges during this period..."
+                                                placeholder="Jelaskan kegiatan, pencapaian, dan tantangan selama periode ini..."
                                                 className="min-h-[150px]"
                                                 {...field}
                                             />
                                         </FormControl>
-                                        <FormDescription>Provide a full description of your performance and activities.</FormDescription>
+                                        <FormDescription>Berikan deskripsi lengkap tentang kinerja dan kegiatan Anda.</FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
-                            <Button type="submit">Submit Report</Button>
+                            <Button type="submit">Kirim Laporan</Button>
                         </form>
                     </Form>
                 </CardContent>

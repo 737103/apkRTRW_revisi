@@ -13,18 +13,18 @@ export function DashboardSidebar() {
   const isAdmin = pathname.startsWith('/admin');
 
   const adminLinks = [
-    { href: '/admin/dashboard', label: 'Performance Data', icon: BarChart2 },
-    { href: '#', label: 'Manage Users', icon: Users, disabled: true },
-    { href: '#', label: 'Settings', icon: Settings, disabled: true },
+    { href: '/admin/dashboard', label: 'Data Kinerja RT RW', icon: BarChart2 },
+    { href: '#', label: 'Kelola Pengguna', icon: Users, disabled: true },
+    { href: '#', label: 'Pengaturan', icon: Settings, disabled: true },
   ];
 
   const userLinks = [
-    { href: '/dashboard/submit-report', label: 'Submit Report', icon: FileText },
-    { href: '/dashboard/announcements', label: 'Announcements', icon: Megaphone },
-    { href: '#', label: 'Settings', icon: Settings, disabled: true },
+    { href: '/dashboard/submit-report', label: 'Kirim Laporan', icon: FileText },
+    { href: '/dashboard/announcements', label: 'Pengumuman', icon: Megaphone },
+    { href: '#', label: 'Pengaturan', icon: Settings, disabled: true },
   ];
   
-  const baseDashboardLink = { href: isAdmin ? '/admin/dashboard' : '/dashboard', label: 'Dashboard', icon: Home };
+  const baseDashboardLink = { href: isAdmin ? '/admin/dashboard' : '/dashboard', label: 'Dasbor', icon: Home };
 
   const navLinks = isAdmin ? [baseDashboardLink, ...adminLinks] : [baseDashboardLink, ...userLinks];
 
@@ -55,7 +55,7 @@ export function DashboardSidebar() {
           <Button variant="ghost" className="w-full justify-start text-base h-11" asChild>
             <Link href="/">
               <LogOut className="mr-3 h-5 w-5" />
-              Logout
+              Keluar
             </Link>
           </Button>
         </div>

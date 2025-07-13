@@ -2,10 +2,10 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Megaphone } from "lucide-react";
 
 const announcements = [
-    { id: 1, title: "Upcoming National Day Celebration", date: "2023-10-15", content: "Join us for the flag hoisting ceremony and various community games. The event will start at 8 AM at the community hall." },
-    { id: 2, title: "Waste Management Schedule Update", date: "2023-10-12", content: "Please be advised of the new waste collection schedule starting next week. Collection will be on Tuesdays and Fridays." },
-    { id: 3, title: "Monthly Community Meeting", date: "2023-10-10", content: "The monthly meeting will be held on October 25th at 7 PM. Agenda includes budget review and upcoming event planning." },
-    { id: 4, title: "Security Patrol Volunteers Needed", date: "2023-10-08", content: "We are looking for volunteers to join the neighborhood security patrol. Please contact Mr. Smith for more information." },
+    { id: 1, title: "Perayaan Hari Kemerdekaan", date: "2023-10-15", content: "Ayo ikuti upacara bendera dan berbagai perlombaan masyarakat. Acara akan dimulai pukul 8 pagi di balai warga." },
+    { id: 2, title: "Pembaruan Jadwal Pengelolaan Sampah", date: "2023-10-12", content: "Harap diperhatikan jadwal pengambilan sampah baru mulai minggu depan. Pengambilan akan dilakukan pada hari Selasa dan Jumat." },
+    { id: 3, title: "Rapat Bulanan Warga", date: "2023-10-10", content: "Rapat bulanan akan diadakan pada tanggal 25 Oktober pukul 7 malam. Agenda meliputi tinjauan anggaran dan perencanaan acara mendatang." },
+    { id: 4, title: "Dibutuhkan Relawan Siskamling", date: "2023-10-08", content: "Kami mencari relawan untuk bergabung dalam patroli keamanan lingkungan. Silakan hubungi Bapak Smith untuk informasi lebih lanjut." },
 ];
 
 export default function AnnouncementsPage() {
@@ -14,8 +14,8 @@ export default function AnnouncementsPage() {
       <div className="flex items-center gap-4">
         <div className="bg-primary/10 p-3 rounded-lg"><Megaphone className="h-8 w-8 text-primary"/></div>
         <div>
-            <h1 className="text-4xl font-bold tracking-tight">Announcements</h1>
-            <p className="text-muted-foreground text-lg">Stay updated with the latest news and events.</p>
+            <h1 className="text-4xl font-bold tracking-tight">Pengumuman</h1>
+            <p className="text-muted-foreground text-lg">Tetap terinformasi dengan berita dan acara terbaru.</p>
         </div>
       </div>
       
