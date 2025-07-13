@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Building, LogIn, Shield, User } from 'lucide-react';
 
@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from "@/hooks/use-toast";
 
 const USERS_STORAGE_KEY = 'rt-rw-users';
+const ADMIN_CREDS_STORAGE_KEY = 'rt-rw-admin-credentials';
 
 export function LoginForm() {
   const router = useRouter();
@@ -26,10 +27,26 @@ export function LoginForm() {
   const [userUsername, setUserUsername] = useState('');
   const [userPassword, setUserPassword] = useState('');
 
+  const getAdminCreds = () => {
+    try {
+      if (typeof window !== 'undefined') {
+        const storedCreds = localStorage.getItem(ADMIN_CREDS_STORAGE_KEY);
+        if (storedCreds) {
+          return JSON.parse(storedCreds);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to parse admin credentials from localStorage", error);
+    }
+    // Fallback to default credentials
+    return { username: 'admin', password: '123456' };
+  }
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (role === 'admin') {
-      if (adminUsername === 'admin' && adminPassword === '123456') {
+      const adminCreds = getAdminCreds();
+      if (adminUsername === adminCreds.username && adminPassword === adminCreds.password) {
         router.push('/admin/dashboard');
       } else {
         toast({
