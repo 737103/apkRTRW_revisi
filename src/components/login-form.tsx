@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const USERS_STORAGE_KEY = 'rt-rw-users';
 const ADMIN_CREDS_STORAGE_KEY = 'rt-rw-admin-credentials';
+const LOGGED_IN_USER_KEY = 'rt-rw-logged-in-user';
 
 export function LoginForm() {
   const router = useRouter();
@@ -47,6 +48,8 @@ export function LoginForm() {
     if (role === 'admin') {
       const adminCreds = getAdminCreds();
       if (adminUsername === adminCreds.username && adminPassword === adminCreds.password) {
+        // Clear any logged in user session
+        localStorage.removeItem(LOGGED_IN_USER_KEY);
         router.push('/admin/dashboard');
       } else {
         toast({
@@ -61,6 +64,7 @@ export function LoginForm() {
           const users = JSON.parse(storedUsers);
           const foundUser = users.find((user: any) => user.username === userUsername && user.password === userPassword);
           if (foundUser) {
+              localStorage.setItem(LOGGED_IN_USER_KEY, JSON.stringify(foundUser));
               router.push('/dashboard');
           } else {
               toast({

@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { FileText, Camera } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const REPORTS_STORAGE_KEY = 'rt-rw-reports';
+const LOGGED_IN_USER_KEY = 'rt-rw-logged-in-user';
 
 const formSchema = z.object({
     namaLengkap: z.string().min(3, "Nama lengkap harus diisi."),
@@ -51,6 +52,30 @@ export default function ReportSubmissionPage() {
             alamatKegiatan: "",
         },
     });
+
+    useEffect(() => {
+        try {
+            const loggedInUserStr = localStorage.getItem(LOGGED_IN_USER_KEY);
+            if (loggedInUserStr) {
+                const loggedInUser = JSON.parse(loggedInUserStr);
+                if (loggedInUser.fullName) {
+                    form.setValue('namaLengkap', loggedInUser.fullName);
+                }
+                if (loggedInUser.position) {
+                    form.setValue('jabatan', loggedInUser.position);
+                }
+                if (loggedInUser.rt) {
+                    form.setValue('rt', loggedInUser.rt);
+                }
+                 if (loggedInUser.rw) {
+                    form.setValue('rw', loggedInUser.rw);
+                }
+            }
+        } catch (error) {
+            console.error("Failed to get user from localStorage", error);
+        }
+    }, [form]);
+
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -115,7 +140,7 @@ export default function ReportSubmissionPage() {
                                         <FormItem>
                                             <FormLabel>Nama RT/RW</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="cth., Budi Santoso" {...field} />
+                                                <Input placeholder="cth., Budi Santoso" {...field} readOnly className="bg-muted/50"/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -127,9 +152,9 @@ export default function ReportSubmissionPage() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Jabatan</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value} disabled>
                                                 <FormControl>
-                                                    <SelectTrigger>
+                                                    <SelectTrigger className="bg-muted/50">
                                                         <SelectValue placeholder="Pilih Jabatan" />
                                                     </SelectTrigger>
                                                 </FormControl>
@@ -149,7 +174,7 @@ export default function ReportSubmissionPage() {
                                         <FormItem>
                                             <FormLabel>RT</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="cth., 01" {...field} />
+                                                <Input placeholder="cth., 01" {...field} readOnly className="bg-muted/50"/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -162,7 +187,7 @@ export default function ReportSubmissionPage() {
                                         <FormItem>
                                             <FormLabel>RW</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="cth., 05" {...field} />
+                                                <Input placeholder="cth., 05" {...field} readOnly className="bg-muted/50" />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
