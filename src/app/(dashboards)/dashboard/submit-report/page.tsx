@@ -75,7 +75,9 @@ export default function ReportSubmissionPage() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-            form.setValue('jamDatang', `${hours}:${minutes}`);
+            const currentTime = `${hours}:${minutes}`;
+            form.setValue('jamDatang', currentTime);
+            form.setValue('jamPulang', currentTime);
 
         } catch (error) {
             console.error("Failed to get user from localStorage or set time", error);
@@ -219,7 +221,7 @@ export default function ReportSubmissionPage() {
                                         <FormItem>
                                             <FormLabel>Jam Pulang</FormLabel>
                                             <FormControl>
-                                                <Input type="time" {...field} />
+                                                <Input type="time" {...field} readOnly className="bg-muted/50"/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
