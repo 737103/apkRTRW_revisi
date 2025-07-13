@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Eye, CheckCircle, Clock } from "lucide-react";
+import { Eye, CheckCircle, Clock, Users, Megaphone, ArrowRight } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -17,6 +18,9 @@ import {
 import { cn } from "@/lib/utils";
 
 const REPORTS_STORAGE_KEY = 'rt-rw-reports';
+const USERS_STORAGE_KEY = 'rt-rw-users';
+const ANNOUNCEMENTS_STORAGE_KEY = 'rt-rw-announcements';
+
 
 interface Report {
   id: string;
@@ -39,6 +43,8 @@ interface Report {
 export default function AdminDashboardPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [userCount, setUserCount] = useState(0);
+  const [announcementCount, setAnnouncementCount] = useState(0);
 
   useEffect(() => {
     try {
@@ -46,10 +52,21 @@ export default function AdminDashboardPage() {
       if (storedReports) {
         const parsedReports = JSON.parse(storedReports).map((report: any) => ({
             ...report,
-            status: Math.random() > 0.5 ? 'Ditinjau' : 'Tertunda' // Mock status for now
+            status: Math.random() > 0.5 ? 'Ditinjau' : 'Tertunda'
         }));
-        setReports(parsedReports.reverse()); // Show newest reports first
+        setReports(parsedReports.reverse()); 
       }
+
+      const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+      if(storedUsers) {
+        setUserCount(JSON.parse(storedUsers).length);
+      }
+
+      const storedAnnouncements = localStorage.getItem(ANNOUNCEMENTS_STORAGE_KEY);
+      if(storedAnnouncements) {
+        setAnnouncementCount(JSON.parse(storedAnnouncements).length);
+      }
+
     } catch (error) {
         console.error("Failed to parse reports from localStorage", error);
     }
@@ -57,10 +74,51 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in-50">
-      <h1 className="text-4xl font-bold tracking-tight">Dasbor Admin</h1>
+      <div>
+        <h1 className="text-4xl font-bold tracking-tight">Dasbor Admin</h1>
+        <p className="text-lg text-muted-foreground">Kelola laporan, pengguna, dan pengumuman.</p>
+      </div>
+
+       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <Card className="shadow-lg">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Laporan</CardTitle>
+              <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{reports.length}</div>
+              <p className="text-xs text-muted-foreground">Laporan yang telah dikirim</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-lg">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Pengguna</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{userCount}</div>
+                <Link href="/dashboards/admin/manage-users" className="text-xs text-muted-foreground hover:underline flex items-center">
+                  Kelola Pengguna <ArrowRight className="ml-1 h-3 w-3" />
+                </Link>
+            </CardContent>
+          </Card>
+          <Card className="shadow-lg">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Pengumuman</CardTitle>
+              <Megaphone className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{announcementCount}</div>
+               <Link href="/dashboards/admin/announcements" className="text-xs text-muted-foreground hover:underline flex items-center">
+                  Kelola Pengumuman <ArrowRight className="ml-1 h-3 w-3" />
+                </Link>
+            </CardContent>
+          </Card>
+      </div>
+
       <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle className="text-2xl">Laporan Kinerja</CardTitle>
+          <CardTitle className="text-2xl">Laporan Kinerja Terbaru</CardTitle>
           <CardDescription>Tinjau dan kelola laporan yang dikirim oleh anggota RT/RW.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -79,7 +137,7 @@ export default function AdminDashboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {reports.map((report) => (
+              {reports.slice(0, 5).map((report) => (
                 <TableRow key={report.id} className="hover:bg-muted/50">
                   <TableCell className="font-medium">{report.namaLengkap}</TableCell>
                   <TableCell>{report.jabatan}</TableCell>
