@@ -26,8 +26,8 @@ export function LoginForm() {
   const renderForm = (role: string) => (
     <form onSubmit={handleLogin} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor={`${role}-email`}>Email</Label>
-        <Input id={`${role}-email`} type="email" placeholder="email@example.com" required />
+        <Label htmlFor={`${role}-username`}>Username</Label>
+        <Input id={`${role}-username`} type="text" placeholder="Masukkan username Anda" required />
       </div>
       <div className="space-y-2">
         <Label htmlFor={`${role}-password`}>Password</Label>
