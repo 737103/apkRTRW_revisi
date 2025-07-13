@@ -14,14 +14,14 @@ export function DashboardSidebar() {
 
   const adminLinks = [
     { href: '/admin/dashboard', label: 'Data Kinerja RT RW', icon: BarChart2 },
-    { href: '#', label: 'Kelola Pengguna', icon: Users, disabled: true },
-    { href: '#', label: 'Pengaturan', icon: Settings, disabled: true },
+    { href: '/admin/manage-users', label: 'Kelola Pengguna', icon: Users },
+    { href: '/admin/settings', label: 'Pengaturan', icon: Settings },
   ];
 
   const userLinks = [
     { href: '/dashboard/submit-report', label: 'Kirim Laporan', icon: FileText },
     { href: '/dashboard/announcements', label: 'Pengumuman', icon: Megaphone },
-    { href: '#', label: 'Pengaturan', icon: Settings, disabled: true },
+    { href: '/dashboard/settings', label: 'Pengaturan', icon: Settings },
   ];
   
   const baseDashboardLink = { href: isAdmin ? '/admin/dashboard' : '/dashboard', label: 'Dasbor', icon: Home };
