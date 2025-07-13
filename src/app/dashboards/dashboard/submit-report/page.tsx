@@ -28,7 +28,7 @@ const formSchema = z.object({
     rt: z.string().min(1, "RT harus diisi."),
     rw: z.string().min(1, "RW harus diisi."),
     jamDatang: z.string().min(1, "Jam datang harus diisi."),
-    jamPulang: z.string().min(1, "Jam pulang harus diisi."),
+    jamPulang: z.string().optional(),
     deskripsiKegiatan: z.string().min(20, {
         message: "Deskripsi kegiatan harus memiliki setidaknya 20 karakter.",
     }),
@@ -147,7 +147,6 @@ export default function ReportSubmissionPage() {
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const currentTime = `${hours}:${minutes}`;
         form.setValue('jamDatang', currentTime);
-        form.setValue('jamPulang', currentTime);
     }, [form]);
 
 
@@ -169,8 +168,15 @@ export default function ReportSubmissionPage() {
         try {
             const storedReports = localStorage.getItem(REPORTS_STORAGE_KEY);
             const reports = storedReports ? JSON.parse(storedReports) : [];
+            
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const departureTime = `${hours}:${minutes}`;
+
             const newReport = {
                 ...values,
+                jamPulang: departureTime,
                 id: new Date().toISOString(), // Unique ID
                 submissionDate: new Date().toLocaleDateString('id-ID'),
             };
@@ -295,7 +301,7 @@ export default function ReportSubmissionPage() {
                                         <FormItem>
                                             <FormLabel>Jam Pulang</FormLabel>
                                             <FormControl>
-                                                <Input type="time" {...field} readOnly className="bg-muted/50"/>
+                                                <Input type="time" {...field} readOnly placeholder="Akan tercatat otomatis" className="bg-muted/50 italic"/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
