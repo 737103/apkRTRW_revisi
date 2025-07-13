@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Camera, MapPin } from "lucide-react";
+import { FileText, Camera, MapPin, Activity } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const REPORTS_STORAGE_KEY = 'rt-rw-reports';
@@ -22,6 +22,7 @@ const LOGGED_IN_USER_KEY = 'rt-rw-logged-in-user';
 const formSchema = z.object({
     namaLengkap: z.string().min(3, "Nama lengkap harus diisi."),
     jabatan: z.string({ required_error: "Jabatan harus dipilih." }),
+    jenisKegiatan: z.string({ required_error: "Jenis kegiatan harus dipilih." }),
     rt: z.string().min(1, "RT harus diisi."),
     rw: z.string().min(1, "RW harus diisi."),
     jamDatang: z.string().min(1, "Jam datang harus diisi."),
@@ -46,6 +47,7 @@ export default function ReportSubmissionPage() {
         defaultValues: {
             namaLengkap: "",
             jabatan: undefined,
+            jenisKegiatan: undefined,
             rt: "",
             rw: "",
             jamDatang: "",
@@ -266,6 +268,33 @@ export default function ReportSubmissionPage() {
                                     )}
                                 />
                              </div>
+                             <FormField
+                                control={form.control}
+                                name="jenisKegiatan"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Jenis Kegiatan</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <div className="relative">
+                                            <Activity className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <SelectTrigger className="pl-10">
+                                                <SelectValue placeholder="Pilih jenis kegiatan" />
+                                            </SelectTrigger>
+                                        </div>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="Rapat Koordinasi">Rapat Koordinasi</SelectItem>
+                                        <SelectItem value="Gotong Royong">Gotong Royong</SelectItem>
+                                        <SelectItem value="Kegiatan Sosial">Kegiatan Sosial</SelectItem>
+                                        <SelectItem value="Keamanan Lingkungan">Keamanan Lingkungan</SelectItem>
+                                        <SelectItem value="Lainnya">Lainnya</SelectItem>
+                                    </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
                              <FormField
                                 control={form.control}
                                 name="deskripsiKegiatan"
