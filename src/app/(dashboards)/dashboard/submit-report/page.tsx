@@ -93,6 +93,11 @@ export default function ReportSubmissionPage() {
                         description: message,
                         variant: 'destructive',
                     });
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0,
                 }
             );
         } else {
