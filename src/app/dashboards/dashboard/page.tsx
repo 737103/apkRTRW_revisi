@@ -6,6 +6,14 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FileText, Megaphone, ArrowRight } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 const LOGGED_IN_USER_KEY = 'rt-rw-logged-in-user';
 const ANNOUNCEMENTS_STORAGE_KEY = 'rt-rw-announcements';
@@ -20,6 +28,7 @@ interface Announcement {
 export default function UserDashboardPage() {
     const [userName, setUserName] = useState('');
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+    const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
 
     useEffect(() => {
         try {
@@ -37,6 +46,14 @@ export default function UserDashboardPage() {
             console.error("Failed to load data from localStorage", error);
         }
     }, []);
+
+    const handleAnnouncementClick = (announcement: Announcement) => {
+      setSelectedAnnouncement(announcement);
+    };
+
+    const handleDialogClose = () => {
+      setSelectedAnnouncement(null);
+    }
 
     return (
         <div className="space-y-6 animate-in fade-in-50">
@@ -58,7 +75,7 @@ export default function UserDashboardPage() {
                         </Button>
                     </CardContent>
                 </Card>
-                 <Link href="/dashboards/dashboard/announcements" className="shadow-lg md:col-span-2 block hover:bg-muted/30 transition-colors rounded-lg">
+                 <div className="shadow-lg md:col-span-2 rounded-lg">
                     <Card className="h-full">
                       <CardHeader>
                           <CardTitle className="flex items-center gap-2 text-xl">
@@ -66,18 +83,22 @@ export default function UserDashboardPage() {
                               Pengumuman Terbaru
                           </CardTitle>
                            <div className="flex justify-between items-center">
-                              <CardDescription>Informasi penting dari pengurus.</CardDescription>
-                               <div className="text-xs text-primary font-semibold flex items-center">
+                              <CardDescription>Informasi penting dari pengurus. Klik untuk melihat detail.</CardDescription>
+                               <Link href="/dashboards/dashboard/announcements" className="text-xs text-primary font-semibold flex items-center hover:underline">
                                   Lihat Semua
                                   <ArrowRight className="ml-1 h-3 w-3" />
-                              </div>
+                              </Link>
                           </div>
                       </CardHeader>
                     <CardContent>
                         {announcements.length > 0 ? (
                             <div className="space-y-4">
                                 {announcements.slice(0, 3).map((ann) => (
-                                    <div key={ann.id} className="p-4 rounded-lg border bg-muted/50">
+                                    <div 
+                                      key={ann.id} 
+                                      className="p-4 rounded-lg border bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
+                                      onClick={() => handleAnnouncementClick(ann)}
+                                    >
                                         <h3 className="font-semibold">{ann.title}</h3>
                                         <p className="text-sm text-muted-foreground mt-1 truncate">{ann.content}</p>
                                         <p className="text-xs text-muted-foreground/80 mt-2">{ann.date || 'Tanggal tidak tersedia'}</p>
@@ -92,8 +113,27 @@ export default function UserDashboardPage() {
                         )}
                     </CardContent>
                     </Card>
-                </Link>
+                </div>
             </div>
+
+            {selectedAnnouncement && (
+              <Dialog open={!!selectedAnnouncement} onOpenChange={(isOpen) => !isOpen && handleDialogClose()}>
+                <DialogContent className="sm:max-w-xl">
+                   <DialogHeader>
+                      <DialogTitle>{selectedAnnouncement.title}</DialogTitle>
+                      <DialogDescription>
+                        Diterbitkan pada: {selectedAnnouncement.date || 'Tanggal tidak tersedia'}
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4 max-h-[60vh] overflow-y-auto pr-4">
+                      <p className="text-sm text-foreground whitespace-pre-wrap">{selectedAnnouncement.content}</p>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={handleDialogClose}>Tutup</Button>
+                    </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
         </div>
     );
 }
