@@ -46,7 +46,7 @@ export function LoginForm() {
           <div className="flex justify-center items-center mb-2">
               <Building className="h-12 w-12 text-primary" />
           </div>
-          <CardTitle className="text-3xl font-bold">RT RW Performance Tracker</CardTitle>
+          <CardTitle className="text-3xl font-bold">Aplikasi Kinerja RT RW</CardTitle>
           <CardDescription>Login to access your dashboard</CardDescription>
       </CardHeader>
       <CardContent>
