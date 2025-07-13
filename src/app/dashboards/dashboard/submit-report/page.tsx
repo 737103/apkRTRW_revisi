@@ -122,18 +122,10 @@ export default function ReportSubmissionPage() {
             const loggedInUserStr = localStorage.getItem(LOGGED_IN_USER_KEY);
             if (loggedInUserStr) {
                 const loggedInUser = JSON.parse(loggedInUserStr);
-                if (loggedInUser.fullName) {
-                    form.setValue('namaLengkap', loggedInUser.fullName);
-                }
-                if (loggedInUser.position) {
-                    form.setValue('jabatan', loggedInUser.position);
-                }
-                if (loggedInUser.rt) {
-                    form.setValue('rt', loggedInUser.rt);
-                }
-                 if (loggedInUser.rw) {
-                    form.setValue('rw', loggedInUser.rw);
-                }
+                form.setValue('namaLengkap', loggedInUser.fullName || "");
+                form.setValue('jabatan', loggedInUser.position || "");
+                form.setValue('rt', loggedInUser.rt || "");
+                form.setValue('rw', loggedInUser.rw || "");
             }
         } catch (error) {
             console.error("Failed to get user from localStorage", error);
@@ -234,7 +226,7 @@ export default function ReportSubmissionPage() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Jabatan</FormLabel>
-                                            <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value} disabled>
+                                            <Select onValueChange={field.onChange} value={field.value} disabled>
                                                 <FormControl>
                                                     <SelectTrigger className="bg-muted/50">
                                                         <SelectValue placeholder="Pilih Jabatan" />
