@@ -222,33 +222,6 @@ export default function ReportSubmissionPage() {
                                 />
                                 <FormField
                                     control={form.control}
-                                    name="jabatan"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Jabatan</FormLabel>
-                                            <Select onValueChange={field.onChange} value={field.value} disabled>
-                                                <FormControl>
-                                                    <SelectTrigger className="bg-muted/50">
-                                                        <SelectValue placeholder="Pilih Jabatan" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="Ketua RT">Ketua RT</SelectItem>
-                                                    <SelectItem value="Ketua RW">Ketua RW</SelectItem>
-                                                    <SelectItem value="Wakil Ketua RT/RW">Wakil Ketua RT/RW</SelectItem>
-                                                    <SelectItem value="Sekretaris">Sekretaris</SelectItem>
-                                                    <SelectItem value="Bendahara">Bendahara</SelectItem>
-                                                    <SelectItem value="Seksi Keamanan">Seksi Keamanan</SelectItem>
-                                                    <SelectItem value="Seksi Kebersihan">Seksi Kebersihan</SelectItem>
-                                                    <SelectItem value="Anggota">Anggota</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
                                     name="rt"
                                     render={({ field }) => (
                                         <FormItem>
