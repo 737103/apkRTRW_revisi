@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Trash2 } from "lucide-react";
+import { Users, Trash2, Pencil } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -33,11 +33,16 @@ const USERS_STORAGE_KEY = 'rt-rw-users';
 export default function ManageUsersPage() {
   const { toast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
-    if (storedUsers) {
-      setUsers(JSON.parse(storedUsers));
+    try {
+      const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+      if (storedUsers) {
+        setUsers(JSON.parse(storedUsers));
+      }
+    } catch (error) {
+      console.error("Failed to parse users from localStorage", error);
     }
   }, []);
 
@@ -53,14 +58,50 @@ export default function ManageUsersPage() {
     },
   });
 
+  useEffect(() => {
+    if (editingUser) {
+      form.reset(editingUser);
+    } else {
+      form.reset({
+        fullName: "",
+        position: undefined,
+        rt: "",
+        rw: "",
+        username: "",
+        password: "",
+      });
+    }
+  }, [editingUser, form]);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const newUsers = [...users, { ...values, id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1 }];
+    let newUsers;
+    if (editingUser) {
+      newUsers = users.map(user => user.id === editingUser.id ? { ...user, ...values } : user);
+      toast({
+        title: "Pengguna Berhasil Diperbarui!",
+        description: `Data untuk ${values.fullName} telah diperbarui.`,
+      });
+    } else {
+      const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
+      newUsers = [...users, { ...values, id: newId }];
+      toast({
+        title: "Pengguna Berhasil Ditambahkan!",
+        description: `Data untuk ${values.fullName} telah disimpan.`,
+      });
+    }
     setUsers(newUsers);
     localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(newUsers));
-    toast({
-      title: "Pengguna Berhasil Ditambahkan!",
-      description: `Data untuk ${values.fullName} telah disimpan.`,
-    });
+    setEditingUser(null);
+    form.reset();
+  }
+
+  function handleEdit(user: User) {
+    setEditingUser(user);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function handleCancelEdit() {
+    setEditingUser(null);
     form.reset();
   }
 
@@ -86,8 +127,8 @@ export default function ManageUsersPage() {
       </div>
       <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle>Formulir Input Pengguna</CardTitle>
-          <CardDescription>Isi detail di bawah ini untuk menambahkan pengguna baru.</CardDescription>
+          <CardTitle>{editingUser ? 'Edit Pengguna' : 'Formulir Input Pengguna'}</CardTitle>
+          <CardDescription>{editingUser ? 'Perbarui detail di bawah ini.' : 'Isi detail di bawah ini untuk menambahkan pengguna baru.'}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -112,7 +153,7 @@ export default function ManageUsersPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Jabatan</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Pilih Jabatan" />
@@ -180,8 +221,14 @@ export default function ManageUsersPage() {
                   )}
                 />
               </div>
-
-              <Button type="submit">Simpan Pengguna</Button>
+              <div className="flex gap-2">
+                <Button type="submit">{editingUser ? 'Perbarui Pengguna' : 'Simpan Pengguna'}</Button>
+                {editingUser && (
+                  <Button type="button" variant="outline" onClick={handleCancelEdit}>
+                    Batal
+                  </Button>
+                )}
+              </div>
             </form>
           </Form>
         </CardContent>
@@ -210,8 +257,19 @@ export default function ManageUsersPage() {
                   <TableCell>{user.position}</TableCell>
                   <TableCell>{user.position === 'Ketua RT' ? `RT ${user.rt}` : `RW ${user.rw}`}</TableCell>
                   <TableCell>{user.username}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right space-x-2">
                     <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                           <Button variant="ghost" size="icon" onClick={() => handleEdit(user)}>
+                                <Pencil className="h-4 w-4" />
+                                <span className="sr-only">Edit</span>
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Edit Pengguna</p>
+                        </TooltipContent>
+                      </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>
                            <Button variant="ghost" size="icon" onClick={() => handleDelete(user.id)} className="text-destructive hover:text-destructive">
