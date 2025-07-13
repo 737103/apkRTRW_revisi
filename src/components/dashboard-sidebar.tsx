@@ -15,6 +15,7 @@ export function DashboardSidebar() {
   const adminLinks = [
     { href: '/admin/dashboard', label: 'Data Kinerja RT RW', icon: BarChart2 },
     { href: '/admin/manage-users', label: 'Kelola Pengguna', icon: Users },
+    { href: '/admin/announcements', label: 'Kelola Pengumuman', icon: Megaphone },
     { href: '/admin/settings', label: 'Pengaturan', icon: Settings },
   ];
 
@@ -41,7 +42,6 @@ export function DashboardSidebar() {
                     variant={pathname === link.href ? 'secondary' : 'ghost'}
                     className="w-full justify-start text-base h-11"
                     asChild
-                    disabled={link.disabled}
                 >
                     <Link href={link.href}>
                         <link.icon className="mr-3 h-5 w-5" />
