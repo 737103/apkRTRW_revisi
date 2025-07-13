@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -236,6 +237,12 @@ export default function ReportSubmissionPage() {
                                                 <SelectContent>
                                                     <SelectItem value="Ketua RT">Ketua RT</SelectItem>
                                                     <SelectItem value="Ketua RW">Ketua RW</SelectItem>
+                                                    <SelectItem value="Wakil Ketua RT/RW">Wakil Ketua RT/RW</SelectItem>
+                                                    <SelectItem value="Sekretaris">Sekretaris</SelectItem>
+                                                    <SelectItem value="Bendahara">Bendahara</SelectItem>
+                                                    <SelectItem value="Seksi Keamanan">Seksi Keamanan</SelectItem>
+                                                    <SelectItem value="Seksi Kebersihan">Seksi Kebersihan</SelectItem>
+                                                    <SelectItem value="Anggota">Anggota</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                             <FormMessage />
