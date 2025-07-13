@@ -58,8 +58,8 @@ export default function UserDashboardPage() {
                         </Button>
                     </CardContent>
                 </Card>
-                 <Card className="shadow-lg md:col-span-2">
-                    <Link href="/dashboards/dashboard/announcements" className="hover:bg-muted/50 block rounded-t-lg">
+                 <Link href="/dashboards/dashboard/announcements" className="shadow-lg md:col-span-2 block hover:bg-muted/30 transition-colors rounded-lg">
+                    <Card className="h-full">
                       <CardHeader>
                           <CardTitle className="flex items-center gap-2 text-xl">
                               <Megaphone className="h-5 w-5 text-accent" />
@@ -73,12 +73,11 @@ export default function UserDashboardPage() {
                               </div>
                           </div>
                       </CardHeader>
-                    </Link>
                     <CardContent>
                         {announcements.length > 0 ? (
                             <div className="space-y-4">
                                 {announcements.slice(0, 3).map((ann) => (
-                                    <div key={ann.id} className="p-4 rounded-lg border bg-muted/30">
+                                    <div key={ann.id} className="p-4 rounded-lg border bg-muted/50">
                                         <h3 className="font-semibold">{ann.title}</h3>
                                         <p className="text-sm text-muted-foreground mt-1 truncate">{ann.content}</p>
                                         <p className="text-xs text-muted-foreground/80 mt-2">{ann.date || 'Tanggal tidak tersedia'}</p>
@@ -92,7 +91,8 @@ export default function UserDashboardPage() {
                             </div>
                         )}
                     </CardContent>
-                </Card>
+                    </Card>
+                </Link>
             </div>
         </div>
     );
