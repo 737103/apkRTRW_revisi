@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -28,12 +28,18 @@ const formSchema = z.object({
 
 type User = z.infer<typeof formSchema> & { id: number };
 
+const USERS_STORAGE_KEY = 'rt-rw-users';
+
 export default function ManageUsersPage() {
   const { toast } = useToast();
-  const [users, setUsers] = useState<User[]>([
-    { id: 1, fullName: 'Budi Santoso', position: 'Ketua RT', rt: '01', rw: '05', username: 'budi.rt01', password:''},
-    { id: 2, fullName: 'Siti Aminah', position: 'Ketua RW', rt: '', rw: '05', username: 'siti.rw05', password:'' },
-  ]);
+  const [users, setUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+    if (storedUsers) {
+      setUsers(JSON.parse(storedUsers));
+    }
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,7 +54,9 @@ export default function ManageUsersPage() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    setUsers(prevUsers => [...prevUsers, { ...values, id: prevUsers.length + 1 }]);
+    const newUsers = [...users, { ...values, id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1 }];
+    setUsers(newUsers);
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(newUsers));
     toast({
       title: "Pengguna Berhasil Ditambahkan!",
       description: `Data untuk ${values.fullName} telah disimpan.`,
@@ -57,7 +65,9 @@ export default function ManageUsersPage() {
   }
 
   function handleDelete(userId: number) {
-    setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
+    const newUsers = users.filter(user => user.id !== userId);
+    setUsers(newUsers);
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(newUsers));
     toast({
         title: "Pengguna Dihapus",
         description: "Data pengguna telah berhasil dihapus.",

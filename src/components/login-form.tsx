@@ -11,6 +11,8 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from "@/hooks/use-toast";
 
+const USERS_STORAGE_KEY = 'rt-rw-users';
+
 export function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
@@ -37,8 +39,26 @@ export function LoginForm() {
         })
       }
     } else {
-      // For now, any user login is accepted
-      router.push('/dashboard');
+      const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+      if (storedUsers) {
+          const users = JSON.parse(storedUsers);
+          const foundUser = users.find((user: any) => user.username === userUsername && user.password === userPassword);
+          if (foundUser) {
+              router.push('/dashboard');
+          } else {
+              toast({
+                  title: "Login Gagal",
+                  description: "Username atau password pengguna salah.",
+                  variant: "destructive",
+              });
+          }
+      } else {
+          toast({
+              title: "Login Gagal",
+              description: "Tidak ada pengguna terdaftar. Silakan hubungi admin.",
+              variant: "destructive",
+          });
+      }
     }
   };
 
@@ -71,7 +91,7 @@ export function LoginForm() {
             </div>
             <Button type="submit" className="w-full">
                 <LogIn className="mr-2 h-4 w-4" />
-                Login as {currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}
+                Masuk sebagai {currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}
             </Button>
         </form>
     )
