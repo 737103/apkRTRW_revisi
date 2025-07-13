@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from "react";
@@ -179,16 +180,20 @@ export default function AdminDashboardPage() {
                           <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
                              <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
+                                    <p className="text-sm font-medium text-muted-foreground">Jabatan</p>
+                                    <p className="font-semibold">{selectedReport.jabatan}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-sm font-medium text-muted-foreground">Jenis Kegiatan</p>
+                                    <p className="font-semibold capitalize">{selectedReport.jenisKegiatan}{selectedReport.jenisKegiatan === 'lainnya' && selectedReport.deskripsiLainnya ? `: ${selectedReport.deskripsiLainnya}` : ''}</p>
+                                </div>
+                                <div className="space-y-1">
                                     <p className="text-sm font-medium text-muted-foreground">Jam Datang</p>
                                     <p className="font-semibold">{selectedReport.jamDatang}</p>
                                 </div>
                                 <div className="space-y-1">
                                     <p className="text-sm font-medium text-muted-foreground">Jam Pulang</p>
                                     <p className="font-semibold">{selectedReport.jamPulang}</p>
-                                </div>
-                                <div className="space-y-1 col-span-2">
-                                    <p className="text-sm font-medium text-muted-foreground">Jenis Kegiatan</p>
-                                    <p className="font-semibold capitalize">{selectedReport.jenisKegiatan}{selectedReport.jenisKegiatan === 'lainnya' && selectedReport.deskripsiLainnya ? `: ${selectedReport.deskripsiLainnya}` : ''}</p>
                                 </div>
                              </div>
                              <div className="space-y-1">
