@@ -23,6 +23,7 @@ const formSchema = z.object({
     namaLengkap: z.string().min(3, "Nama lengkap harus diisi."),
     jabatan: z.string({ required_error: "Jabatan harus dipilih." }),
     jenisKegiatan: z.string({ required_error: "Jenis kegiatan harus dipilih." }),
+    deskripsiLainnya: z.string().optional(),
     rt: z.string().min(1, "RT harus diisi."),
     rw: z.string().min(1, "RW harus diisi."),
     jamDatang: z.string().min(1, "Jam datang harus diisi."),
@@ -33,6 +34,14 @@ const formSchema = z.object({
     alamatKegiatan: z.string().min(10, "Alamat kegiatan harus diisi."),
     lokasiKegiatan: z.string().min(1, "Lokasi kegiatan harus diaktifkan."),
     fotoKegiatan: z.any(),
+}).refine(data => {
+    if (data.jenisKegiatan === 'lainnya') {
+        return !!data.deskripsiLainnya && data.deskripsiLainnya.length > 0;
+    }
+    return true;
+}, {
+    message: "Deskripsi kegiatan lainnya harus diisi jika memilih 'Lainnya'.",
+    path: ["deskripsiLainnya"],
 });
 
 
@@ -48,6 +57,7 @@ export default function ReportSubmissionPage() {
             namaLengkap: "",
             jabatan: undefined,
             jenisKegiatan: undefined,
+            deskripsiLainnya: "",
             rt: "",
             rw: "",
             jamDatang: "",
@@ -57,6 +67,8 @@ export default function ReportSubmissionPage() {
             lokasiKegiatan: "Sedang mengambil lokasi...",
         },
     });
+
+    const jenisKegiatan = form.watch("jenisKegiatan");
 
     useEffect(() => {
         // Get GPS Location
@@ -298,6 +310,25 @@ export default function ReportSubmissionPage() {
                                 </FormItem>
                                 )}
                             />
+                            {jenisKegiatan === 'lainnya' && (
+                                <FormField
+                                    control={form.control}
+                                    name="deskripsiLainnya"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Deskripsi Kegiatan Lainnya</FormLabel>
+                                            <FormControl>
+                                                <Textarea
+                                                    placeholder="Jelaskan kegiatan lainnya yang dilakukan..."
+                                                    className="min-h-[100px]"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
                              <FormField
                                 control={form.control}
                                 name="deskripsiKegiatan"
