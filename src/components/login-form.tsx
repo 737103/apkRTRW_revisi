@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -151,7 +152,7 @@ export function LoginForm() {
               <Building className="h-12 w-12 text-primary" />
           </div>
           <CardTitle className="text-3xl font-bold">Aplikasi Kinerja RT RW</CardTitle>
-          <CardDescription>Silahkan login</CardDescription>
+          <CardDescription>Kelurahan Bara Baraya Selatan</CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="user" onValueChange={setRole} className="w-full">
