@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Users, Megaphone, Settings, Building, LogOut, FileText, BarChart3, User } from 'lucide-react';
+import { Home, Users, Megaphone, Settings, Building, LogOut, FileText, User } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -44,7 +44,7 @@ export function DashboardSidebar() {
 
   const userLinks = [
     { href: '/dashboards/dashboard/submit-report', label: 'Kirim Laporan', icon: FileText },
-    { href: '/dashboards/dashboard/performance-data', label: 'Data Kinerja', icon: BarChart3 },
+    { href: '/dashboards/dashboard/performance-data', label: 'Data Kinerja', icon: FileText },
   ];
   
   const baseDashboardLink = { href: isAdmin ? '/dashboards/admin/dashboard' : '/dashboards/dashboard', label: 'Dasbor', icon: Home };
