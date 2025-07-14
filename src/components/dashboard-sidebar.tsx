@@ -1,16 +1,40 @@
+
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Users, Megaphone, Settings, Building, LogOut, FileText, BarChart3 } from 'lucide-react';
+import { Home, Users, Megaphone, Settings, Building, LogOut, FileText, BarChart3, User } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
+const LOGGED_IN_USER_KEY = 'rt-rw-logged-in-user';
+
 export function DashboardSidebar() {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith('/dashboards/admin');
+  const [userInfo, setUserInfo] = useState<{ fullName: string; position: string } | null>(null);
+
+  useEffect(() => {
+    try {
+      if (isAdmin) {
+        setUserInfo({ fullName: 'Admin', position: 'Administrator' });
+        return;
+      }
+      const loggedInUserStr = localStorage.getItem(LOGGED_IN_USER_KEY);
+      if (loggedInUserStr) {
+        const loggedInUser = JSON.parse(loggedInUserStr);
+        setUserInfo({
+          fullName: loggedInUser.fullName || 'Pengguna',
+          position: loggedInUser.position || 'Anggota'
+        });
+      }
+    } catch (error) {
+      console.error("Failed to load user info from localStorage", error);
+    }
+  }, [isAdmin]);
 
   const adminLinks = [
     { href: '/dashboards/admin/manage-users', label: 'Kelola Pengguna', icon: Users },
@@ -29,10 +53,24 @@ export function DashboardSidebar() {
 
   return (
     <aside className="hidden md:flex w-64 flex-col border-r bg-card p-4">
-        <div className="flex items-center gap-3 mb-8 px-2">
+        <div className="flex items-center gap-3 mb-4 px-2">
             <Building className="h-8 w-8 text-primary" />
             <h1 className="text-xl font-bold tracking-tight">Aplikasi Penilaian RT RW</h1>
         </div>
+        
+        {userInfo && (
+            <div className="px-2 mb-4">
+              <Separator />
+              <div className="flex items-center gap-3 pt-4">
+                <User className="h-6 w-6 text-muted-foreground" />
+                <div>
+                    <p className="font-semibold text-sm">{userInfo.fullName}</p>
+                    <p className="text-xs text-muted-foreground">{userInfo.position}</p>
+                </div>
+              </div>
+            </div>
+        )}
+
         <nav className="flex-1 space-y-1">
             {navLinks.map((link) => (
                 <Button
