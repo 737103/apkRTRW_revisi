@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Eye, CheckCircle, Clock } from "lucide-react";
+import { Eye, CheckCircle, Clock, XCircle } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 const REPORTS_STORAGE_KEY = 'rt-rw-reports';
 const LOGGED_IN_USER_KEY = 'rt-rw-logged-in-user';
 
+type ReportStatus = 'Tertunda' | 'Disetujui' | 'Ditolak';
 
 interface Report {
   id: string;
@@ -36,7 +37,7 @@ interface Report {
   lokasiKegiatan: string;
   fotoKegiatan: string;
   submissionDate: string;
-  status: 'Ditinjau' | 'Tertunda';
+  status: ReportStatus;
 }
 
 export default function PerformanceDataPage() {
@@ -55,7 +56,7 @@ export default function PerformanceDataPage() {
         const userReports = allReports.filter((report: any) => report.namaLengkap === loggedInUser.fullName)
           .map((report: any) => ({
               ...report,
-              status: Math.random() > 0.5 ? 'Ditinjau' : 'Tertunda'
+              status: report.status || 'Tertunda'
           }));
         setReports(userReports.reverse()); 
       }
@@ -95,10 +96,14 @@ export default function PerformanceDataPage() {
                   <TableCell className="font-medium capitalize">{report.jenisKegiatan}{report.jenisKegiatan === 'lainnya' && report.deskripsiLainnya ? `: ${report.deskripsiLainnya}` : ''}</TableCell>
                   <TableCell>{report.submissionDate}</TableCell>
                   <TableCell>
-                    <Badge variant={report.status === 'Tertunda' ? 'outline' : 'default'} className={cn(
-                        report.status === 'Tertunda' ? 'border-yellow-500/50 text-yellow-600' : 'bg-accent text-accent-foreground'
+                    <Badge variant={report.status === 'Tertunda' ? 'outline' : report.status === 'Disetujui' ? 'default' : 'destructive'} className={cn(
+                        report.status === 'Tertunda' ? 'border-yellow-500/50 text-yellow-600' : 
+                        report.status === 'Disetujui' ? 'bg-accent text-accent-foreground' :
+                        'bg-destructive/80 text-destructive-foreground'
                     )}>
-                        {report.status === 'Tertunda' ? <Clock className="mr-1 h-3 w-3" /> : <CheckCircle className="mr-1 h-3 w-3" />}
+                        {report.status === 'Tertunda' && <Clock className="mr-1 h-3 w-3" />}
+                        {report.status === 'Disetujui' && <CheckCircle className="mr-1 h-3 w-3" />}
+                        {report.status === 'Ditolak' && <XCircle className="mr-1 h-3 w-3" />}
                         {report.status}
                     </Badge>
                   </TableCell>

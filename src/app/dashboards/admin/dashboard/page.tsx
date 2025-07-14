@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Eye, CheckCircle, Clock, Users, Megaphone, ArrowRight } from "lucide-react";
+import { Eye, CheckCircle, Clock, Users, Megaphone, ArrowRight, XCircle, Check } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -17,12 +17,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 const REPORTS_STORAGE_KEY = 'rt-rw-reports';
 const USERS_STORAGE_KEY = 'rt-rw-users';
 const ANNOUNCEMENTS_STORAGE_KEY = 'rt-rw-announcements';
 
-
+type ReportStatus = 'Tertunda' | 'Disetujui' | 'Ditolak';
 interface Report {
   id: string;
   namaLengkap: string;
@@ -38,7 +39,7 @@ interface Report {
   lokasiKegiatan: string;
   fotoKegiatan: string;
   submissionDate: string;
-  status: 'Ditinjau' | 'Tertunda';
+  status: ReportStatus;
 }
 
 export default function AdminDashboardPage() {
@@ -46,18 +47,26 @@ export default function AdminDashboardPage() {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [userCount, setUserCount] = useState(0);
   const [announcementCount, setAnnouncementCount] = useState(0);
+  const { toast } = useToast();
 
-  useEffect(() => {
+  const fetchReports = () => {
     try {
       const storedReports = localStorage.getItem(REPORTS_STORAGE_KEY);
       if (storedReports) {
         const parsedReports = JSON.parse(storedReports).map((report: any) => ({
             ...report,
-            status: Math.random() > 0.5 ? 'Ditinjau' : 'Tertunda'
+            status: report.status || 'Tertunda'
         }));
         setReports(parsedReports.reverse()); 
       }
+    } catch (error) {
+        console.error("Failed to parse reports from localStorage", error);
+    }
+  };
 
+  useEffect(() => {
+    fetchReports();
+    try {
       const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
       if(storedUsers) {
         setUserCount(JSON.parse(storedUsers).length);
@@ -67,11 +76,40 @@ export default function AdminDashboardPage() {
       if(storedAnnouncements) {
         setAnnouncementCount(JSON.parse(storedAnnouncements).length);
       }
-
     } catch (error) {
-        console.error("Failed to parse reports from localStorage", error);
+        console.error("Failed to load dashboard data from localStorage", error);
     }
   }, []);
+
+  const updateReportStatus = (reportId: string, status: ReportStatus) => {
+    try {
+        const storedReports = localStorage.getItem(REPORTS_STORAGE_KEY);
+        if (!storedReports) return;
+
+        let reports: Report[] = JSON.parse(storedReports);
+        const reportIndex = reports.findIndex(r => r.id === reportId);
+
+        if (reportIndex > -1) {
+            reports[reportIndex].status = status;
+            localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(reports));
+            // Refresh local state
+            fetchReports();
+            setSelectedReport(prev => prev ? {...prev, status: status} : null);
+
+            toast({
+                title: "Status Laporan Diperbarui",
+                description: `Laporan telah ditandai sebagai ${status}.`,
+            });
+        }
+    } catch(error) {
+        console.error("Failed to update report status", error);
+        toast({
+            title: "Gagal Memperbarui Status",
+            description: "Terjadi kesalahan saat memperbarui status laporan.",
+            variant: "destructive",
+        });
+    }
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in-50">
@@ -84,7 +122,7 @@ export default function AdminDashboardPage() {
           <Card className="shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Laporan</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
+              <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{reports.length}</div>
@@ -145,10 +183,14 @@ export default function AdminDashboardPage() {
                   <TableCell>{`RT ${report.rt} / RW ${report.rw}`}</TableCell>
                   <TableCell>{report.submissionDate}</TableCell>
                   <TableCell>
-                    <Badge variant={report.status === 'Tertunda' ? 'outline' : 'default'} className={cn(
-                        report.status === 'Tertunda' ? 'border-yellow-500/50 text-yellow-600' : 'bg-accent text-accent-foreground'
+                    <Badge variant={report.status === 'Tertunda' ? 'outline' : report.status === 'Disetujui' ? 'default' : 'destructive'} className={cn(
+                        report.status === 'Tertunda' ? 'border-yellow-500/50 text-yellow-600' : 
+                        report.status === 'Disetujui' ? 'bg-accent text-accent-foreground' :
+                        'bg-destructive/80 text-destructive-foreground'
                     )}>
-                        {report.status === 'Tertunda' ? <Clock className="mr-1 h-3 w-3" /> : <CheckCircle className="mr-1 h-3 w-3" />}
+                        {report.status === 'Tertunda' && <Clock className="mr-1 h-3 w-3" />}
+                        {report.status === 'Disetujui' && <CheckCircle className="mr-1 h-3 w-3" />}
+                        {report.status === 'Ditolak' && <XCircle className="mr-1 h-3 w-3" />}
                         {report.status}
                     </Badge>
                   </TableCell>
@@ -229,7 +271,15 @@ export default function AdminDashboardPage() {
                                 )}
                             </div>
                           </div>
-                          <DialogFooter>
+                          <DialogFooter className="justify-between">
+                            <div className="flex gap-2">
+                                <Button variant="destructive" onClick={() => updateReportStatus(selectedReport.id, 'Ditolak')}>
+                                    <XCircle className="mr-2 h-4 w-4" /> Tolak
+                                </Button>
+                                <Button variant="default" className="bg-accent hover:bg-accent/90" onClick={() => updateReportStatus(selectedReport.id, 'Disetujui')}>
+                                    <Check className="mr-2 h-4 w-4" /> Setujui
+                                </Button>
+                            </div>
                             <Button variant="outline" onClick={() => setSelectedReport(null)}>Tutup</Button>
                           </DialogFooter>
                         </DialogContent>

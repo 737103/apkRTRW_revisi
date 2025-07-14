@@ -169,8 +169,9 @@ export default function ReportSubmissionPage() {
             const newReport = {
                 ...values,
                 jamPulang: departureTime,
-                id: new Date().toISOString(), // Unique ID
-                submissionDate: new Date().toLocaleDateString('id-ID'),
+                id: `report-${new Date().getTime()}`,
+                submissionDate: new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
+                status: 'Tertunda' as const,
             };
             reports.push(newReport);
             localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(reports));
@@ -182,7 +183,7 @@ export default function ReportSubmissionPage() {
             });
             form.reset();
             setPreview(null);
-            router.push('/dashboards/dashboard');
+            router.push('/dashboards/dashboard/performance-data');
         } catch(error) {
              console.error("Failed to save report to localStorage", error);
              toast({
