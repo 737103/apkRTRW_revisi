@@ -168,8 +168,8 @@ export default function AdminDashboardPage() {
         const storedReports = localStorage.getItem(REPORTS_STORAGE_KEY);
         if (!storedReports) return;
         
-        let reports: Report[] = JSON.parse(storedReports);
-        const updatedReports = reports.filter(report => report.id !== reportId);
+        let reportsData: Report[] = JSON.parse(storedReports);
+        const updatedReports = reportsData.filter(report => report.id !== reportId);
         
         localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(updatedReports));
         setReports(updatedReports.reverse());
@@ -273,7 +273,7 @@ export default function AdminDashboardPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedReport(null)}>
+                    <Dialog onOpenChange={(isOpen) => !isOpen && handleDialogClose()}>
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -355,8 +355,8 @@ export default function AdminDashboardPage() {
                                 </div>
                             )}
                           </div>
-                          <DialogFooter className="justify-between sm:justify-between items-center gap-2 flex-wrap">
-                            <div className="flex gap-2">
+                          <DialogFooter className="justify-between sm:justify-between items-center gap-2 flex-wrap pt-4 border-t">
+                            <div className="flex gap-2 flex-wrap">
                                 <Button variant="destructive" onClick={() => updateReportStatus(selectedReport.id, 'Ditolak')}>
                                     <XCircle className="mr-2 h-4 w-4" /> Tolak
                                 </Button>
@@ -366,6 +366,28 @@ export default function AdminDashboardPage() {
                                 <Button variant="secondary" onClick={() => openNoteDialog(selectedReport)}>
                                     <MessageSquarePlus className="mr-2 h-4 w-4" /> Catatan
                                 </Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button variant="outline" className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/50">
+                                          <Trash2 className="mr-2 h-4 w-4" /> Hapus
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                        <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Tindakan ini tidak dapat diurungkan. Ini akan menghapus laporan secara permanen.
+                                        </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => {
+                                            deleteReport(selectedReport.id);
+                                            handleDialogClose();
+                                        }} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </div>
                             <DialogClose asChild>
                                 <Button variant="outline">Tutup</Button>
@@ -412,7 +434,7 @@ export default function AdminDashboardPage() {
         </CardContent>
       </Card>
       
-      <Dialog open={isNoteDialogOpen} onOpenChange={setIsNoteDialogOpen}>
+      <Dialog open={isNoteDialogOpen} onOpenChange={(isOpen) => !isOpen && handleDialogClose()}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Tambah/Edit Catatan</DialogTitle>
