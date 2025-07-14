@@ -3,12 +3,13 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Eye, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Eye, CheckCircle, Clock, XCircle, Pencil } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -16,6 +17,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const REPORTS_STORAGE_KEY = 'rt-rw-reports';
 const LOGGED_IN_USER_KEY = 'rt-rw-logged-in-user';
@@ -44,6 +46,7 @@ interface Report {
 export default function PerformanceDataPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     try {
@@ -65,6 +68,10 @@ export default function PerformanceDataPage() {
         console.error("Failed to parse reports from localStorage", error);
     }
   }, []);
+  
+  const handleEditClick = (reportId: string) => {
+    router.push(`/dashboards/dashboard/submit-report?edit=${reportId}`);
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in-50">
@@ -112,9 +119,20 @@ export default function PerformanceDataPage() {
                   <TableCell>
                     <span className="text-sm text-muted-foreground italic">{report.notes || "-"}</span>
                   </TableCell>
-                  <TableCell className="text-right">
-                    <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedReport(null)}>
-                      <TooltipProvider>
+                  <TableCell className="text-right space-x-1">
+                    <TooltipProvider>
+                       <Tooltip>
+                          <TooltipTrigger asChild>
+                             <Button variant="ghost" size="icon" onClick={() => handleEditClick(report.id)} disabled={report.status !== 'Tertunda'}>
+                                <Pencil className="h-4 w-4" />
+                                <span className="sr-only">Edit Laporan</span>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{report.status === 'Tertunda' ? 'Edit Laporan' : 'Laporan tidak dapat diedit'}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedReport(null)}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                              <DialogTrigger asChild>
@@ -128,7 +146,6 @@ export default function PerformanceDataPage() {
                             <p>Lihat Detail Laporan</p>
                           </TooltipContent>
                         </Tooltip>
-                      </TooltipProvider>
                       {selectedReport && selectedReport.id === report.id && (
                         <DialogContent className="max-w-2xl">
                           <DialogHeader>
@@ -201,6 +218,7 @@ export default function PerformanceDataPage() {
                         </DialogContent>
                       )}
                     </Dialog>
+                    </TooltipProvider>
                   </TableCell>
                 </TableRow>
               ))}

@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
@@ -21,6 +21,7 @@ const REPORTS_STORAGE_KEY = 'rt-rw-reports';
 const LOGGED_IN_USER_KEY = 'rt-rw-logged-in-user';
 
 const formSchema = z.object({
+    id: z.string().optional(),
     namaLengkap: z.string().min(3, "Nama lengkap harus diisi."),
     jabatan: z.string().min(1, "Jabatan harus diisi."),
     jenisKegiatan: z.string({ required_error: "Jenis kegiatan harus dipilih." }),
@@ -35,6 +36,8 @@ const formSchema = z.object({
     alamatKegiatan: z.string().min(10, "Alamat kegiatan harus diisi."),
     lokasiKegiatan: z.string().min(1, "Lokasi kegiatan harus diaktifkan.").refine(val => val !== 'Gagal mendapatkan lokasi', { message: "Lokasi GPS harus berhasil didapatkan."}),
     fotoKegiatan: z.any().refine(file => file, "Foto kegiatan harus diunggah."),
+    submissionDate: z.string().optional(),
+    status: z.string().optional(),
 }).refine(data => {
     if (data.jenisKegiatan === 'lainnya') {
         return !!data.deskripsiLainnya && data.deskripsiLainnya.length > 0;
@@ -49,6 +52,10 @@ const formSchema = z.object({
 export default function ReportSubmissionPage() {
     const { toast } = useToast();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const editId = searchParams.get('edit');
+    const [isEditMode, setIsEditMode] = useState(false);
+    
     const [preview, setPreview] = useState<string | null>(null);
     const [locationError, setLocationError] = useState<string | null>(null);
 
@@ -73,7 +80,34 @@ export default function ReportSubmissionPage() {
     const jenisKegiatan = form.watch("jenisKegiatan");
 
     useEffect(() => {
-        // Get GPS Location
+        // Handle Edit Mode
+        if(editId) {
+            setIsEditMode(true);
+            try {
+                const storedReports = localStorage.getItem(REPORTS_STORAGE_KEY);
+                if (storedReports) {
+                    const reports = JSON.parse(storedReports);
+                    const reportToEdit = reports.find((r: any) => r.id === editId);
+                    if (reportToEdit) {
+                        form.reset(reportToEdit);
+                        if (reportToEdit.fotoKegiatan) {
+                            setPreview(reportToEdit.fotoKegiatan);
+                        }
+                    } else {
+                        toast({ title: "Laporan tidak ditemukan", variant: "destructive"});
+                        router.push('/dashboards/dashboard/performance-data');
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to load report for editing", error);
+            }
+        }
+    }, [editId, form, router, toast]);
+
+    useEffect(() => {
+        // Get GPS Location only on new reports
+        if (isEditMode) return;
+
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -114,10 +148,13 @@ export default function ReportSubmissionPage() {
                 variant: 'destructive',
             });
         }
-    }, [form, toast]);
+    }, [form, toast, isEditMode]);
 
 
     useEffect(() => {
+        // Populate user data only on new reports
+        if(isEditMode) return;
+
         try {
             const loggedInUserStr = localStorage.getItem(LOGGED_IN_USER_KEY);
             if (loggedInUserStr) {
@@ -130,16 +167,19 @@ export default function ReportSubmissionPage() {
         } catch (error) {
             console.error("Failed to get user from localStorage", error);
         }
-    }, [form]);
+    }, [form, isEditMode]);
 
 
     useEffect(() => {
+        // Set arrival time only on new reports
+        if(isEditMode) return;
+
         const now = new Date();
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const currentTime = `${hours}:${minutes}`;
         form.setValue('jamDatang', currentTime);
-    }, [form]);
+    }, [form, isEditMode]);
 
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -159,28 +199,35 @@ export default function ReportSubmissionPage() {
     function onSubmit(values: z.infer<typeof formSchema>) {
         try {
             const storedReports = localStorage.getItem(REPORTS_STORAGE_KEY);
-            const reports = storedReports ? JSON.parse(storedReports) : [];
+            let reports = storedReports ? JSON.parse(storedReports) : [];
             
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const departureTime = `${hours}:${minutes}`;
+            if (isEditMode) {
+                 reports = reports.map((r: any) => r.id === values.id ? values : r);
+                 toast({
+                    title: "Laporan Berhasil Diperbarui!",
+                    description: "Perubahan pada laporan kinerja Anda telah disimpan.",
+                 });
+            } else {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const departureTime = `${hours}:${minutes}`;
 
-            const newReport = {
-                ...values,
-                jamPulang: departureTime,
-                id: `report-${new Date().getTime()}`,
-                submissionDate: new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
-                status: 'Tertunda' as const,
-            };
-            reports.push(newReport);
+                const newReport = {
+                    ...values,
+                    jamPulang: departureTime,
+                    id: `report-${new Date().getTime()}`,
+                    submissionDate: new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }),
+                    status: 'Tertunda' as const,
+                };
+                reports.push(newReport);
+                toast({
+                    title: "Laporan Berhasil Dikirim!",
+                    description: "Laporan kinerja Anda telah dikirim untuk ditinjau.",
+                });
+            }
+            
             localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(reports));
-
-            toast({
-                title: "Laporan Berhasil Dikirim!",
-                description: "Laporan kinerja Anda telah dikirim untuk ditinjau.",
-                variant: "default",
-            });
             form.reset();
             setPreview(null);
             router.push('/dashboards/dashboard/performance-data');
@@ -200,9 +247,9 @@ export default function ReportSubmissionPage() {
                 <CardHeader>
                     <div className="flex items-center gap-3">
                       <FileText className="h-6 w-6 text-primary"/>
-                      <CardTitle className="text-2xl">Kirim Laporan Kinerja</CardTitle>
+                      <CardTitle className="text-2xl">{isEditMode ? 'Edit Laporan Kinerja' : 'Kirim Laporan Kinerja'}</CardTitle>
                     </div>
-                    <CardDescription>Isi formulir di bawah ini untuk mengirimkan laporan Anda. Harap berikan detail selengkap mungkin.</CardDescription>
+                    <CardDescription>{isEditMode ? 'Perbarui detail laporan Anda di bawah ini.' : 'Isi formulir di bawah ini untuk mengirimkan laporan Anda. Harap berikan detail selengkap mungkin.'}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -267,7 +314,7 @@ export default function ReportSubmissionPage() {
                                         <FormItem>
                                             <FormLabel>Jam Datang</FormLabel>
                                             <FormControl>
-                                                <Input type="time" {...field} readOnly className="bg-muted/50"/>
+                                                <Input type="time" {...field} readOnly={!isEditMode} className={!isEditMode ? "bg-muted/50" : ""}/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -280,7 +327,7 @@ export default function ReportSubmissionPage() {
                                         <FormItem>
                                             <FormLabel>Jam Pulang</FormLabel>
                                             <FormControl>
-                                                <Input type="time" {...field} readOnly placeholder="Akan tercatat otomatis" className="bg-muted/50 italic"/>
+                                                <Input type="time" {...field} readOnly placeholder="Akan tercatat otomatis saat kirim" className="bg-muted/50 italic"/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -293,7 +340,7 @@ export default function ReportSubmissionPage() {
                                 render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Jenis Kegiatan</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                                     <FormControl>
                                         <div className="relative">
                                             <Activity className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -408,7 +455,7 @@ export default function ReportSubmissionPage() {
                                                 className="cursor-pointer inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 px-4 py-2"
                                             >
                                                 <Camera className="h-4 w-4"/>
-                                                Pilih Foto
+                                                {isEditMode ? 'Ganti Foto' : 'Pilih Foto'}
                                             </label>
                                         </div>
                                     </FormControl>
@@ -421,7 +468,7 @@ export default function ReportSubmissionPage() {
                                 </FormItem>
                                 )}
                             />
-                            <Button type="submit" disabled={!form.formState.isValid}>Kirim Laporan</Button>
+                            <Button type="submit" disabled={!form.formState.isValid}>{isEditMode ? 'Simpan Perubahan' : 'Kirim Laporan'}</Button>
                         </form>
                     </Form>
                 </CardContent>
