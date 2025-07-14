@@ -206,11 +206,17 @@ export default function ReportSubmissionPage() {
             if (isEditMode && values.id) {
                  const index = reports.findIndex((r: any) => r.id === values.id);
                  if (index !== -1) {
-                    reports[index] = { ...reports[index], ...values };
+                    const originalReport = reports[index];
+                    reports[index] = { 
+                        ...originalReport, 
+                        ...values, 
+                        // Pastikan status direset menjadi 'Tertunda' setelah diedit
+                        status: 'Tertunda' 
+                    };
                  }
                  toast({
                     title: "Laporan Berhasil Diperbarui!",
-                    description: "Perubahan pada laporan kinerja Anda telah disimpan.",
+                    description: "Perubahan pada laporan kinerja Anda telah disimpan dan dikirim ulang untuk peninjauan.",
                  });
             } else {
                 const now = new Date();
@@ -254,7 +260,7 @@ export default function ReportSubmissionPage() {
                       <FileText className="h-6 w-6 text-primary"/>
                       <CardTitle className="text-2xl">{isEditMode ? 'Edit Laporan Kinerja' : 'Kirim Laporan Kinerja'}</CardTitle>
                     </div>
-                    <CardDescription>{isEditMode ? 'Perbarui detail laporan Anda di bawah ini.' : 'Isi formulir di bawah ini untuk mengirimkan laporan Anda. Harap berikan detail selengkap mungkin.'}</CardDescription>
+                    <CardDescription>{isEditMode ? 'Perbarui detail laporan Anda di bawah ini. Laporan yang diperbarui akan ditinjau kembali oleh admin.' : 'Isi formulir di bawah ini untuk mengirimkan laporan Anda. Harap berikan detail selengkap mungkin.'}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -319,7 +325,7 @@ export default function ReportSubmissionPage() {
                                         <FormItem>
                                             <FormLabel>Jam Datang</FormLabel>
                                             <FormControl>
-                                                <Input type="time" {...field} readOnly={!isEditMode} className={!isEditMode ? "bg-muted/50" : ""}/>
+                                                <Input type="time" {...field} readOnly className="bg-muted/50"/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
