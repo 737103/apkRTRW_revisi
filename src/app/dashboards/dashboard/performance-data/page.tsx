@@ -120,7 +120,9 @@ export default function PerformanceDataPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <span className="text-sm text-muted-foreground italic truncate max-w-[150px] inline-block">{report.notes || "-"}</span>
+                    <span className="text-sm text-muted-foreground italic truncate max-w-[150px] inline-block">
+                        {report.status !== 'Disetujui' ? (report.notes || "-") : "-"}
+                    </span>
                   </TableCell>
                   <TableCell className="text-right space-x-1">
                     <TooltipProvider>
@@ -208,7 +210,7 @@ export default function PerformanceDataPage() {
                                     <p className="text-sm text-muted-foreground">Tidak ada foto dilampirkan.</p>
                                 )}
                             </div>
-                            {selectedReport.notes && (
+                            {selectedReport.notes && selectedReport.status !== 'Disetujui' && (
                                 <div className="space-y-1 mt-4 pt-4 border-t">
                                     <p className="text-sm font-medium text-muted-foreground">Catatan dari Admin</p>
                                     <p className="text-sm p-3 bg-muted/50 rounded-md whitespace-pre-wrap">{selectedReport.notes}</p>
