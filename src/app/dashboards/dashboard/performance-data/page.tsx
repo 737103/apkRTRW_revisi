@@ -88,6 +88,7 @@ export default function PerformanceDataPage() {
                 <TableHead>Jenis Kegiatan</TableHead>
                 <TableHead>Tanggal</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Catatan dari Admin</TableHead>
                 <TableHead className="text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
@@ -107,6 +108,9 @@ export default function PerformanceDataPage() {
                         {report.status === 'Ditolak' && <XCircle className="mr-1 h-3 w-3" />}
                         {report.status}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm text-muted-foreground italic">{report.notes || "-"}</span>
                   </TableCell>
                   <TableCell className="text-right">
                     <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedReport(null)}>
@@ -208,5 +212,3 @@ export default function PerformanceDataPage() {
     </div>
   );
 }
-
-    
