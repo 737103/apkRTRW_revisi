@@ -208,12 +208,11 @@ export default function ReportSubmissionPage() {
                  if (index !== -1) {
                     const originalReport = reports[index];
                     reports[index] = { 
-                        ...values, // Get all updated values from the form
-                        // Preserve original times
+                        ...values,
                         jamDatang: originalReport.jamDatang,
                         jamPulang: originalReport.jamPulang,
                         submissionDate: originalReport.submissionDate,
-                        status: 'Tertunda' // Reset status to 'Tertunda'
+                        status: 'Tertunda'
                     };
                  }
                  toast({
@@ -327,7 +326,7 @@ export default function ReportSubmissionPage() {
                                         <FormItem>
                                             <FormLabel>Jam Datang</FormLabel>
                                             <FormControl>
-                                                <Input type="time" {...field} readOnly={isEditMode} className="bg-muted/50"/>
+                                                <Input type="time" {...field} readOnly className="bg-muted/50"/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -340,7 +339,7 @@ export default function ReportSubmissionPage() {
                                         <FormItem>
                                             <FormLabel>Jam Pulang</FormLabel>
                                             <FormControl>
-                                                <Input type="time" {...field} readOnly placeholder={isEditMode ? field.value : "Akan tercatat otomatis saat kirim"} className="bg-muted/50 italic"/>
+                                                <Input type="time" {...field} readOnly placeholder="Akan tercatat otomatis saat kirim" className="bg-muted/50 italic"/>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -481,7 +480,10 @@ export default function ReportSubmissionPage() {
                                 </FormItem>
                                 )}
                             />
-                            <Button type="submit" disabled={!form.formState.isValid}>{isEditMode ? 'Simpan Perubahan' : 'Kirim Laporan'}</Button>
+                            <div className="flex gap-2">
+                                <Button type="submit" disabled={!form.formState.isValid}>{isEditMode ? 'Simpan Perubahan' : 'Kirim Laporan'}</Button>
+                                <Button type="button" variant="outline" onClick={() => router.back()}>Batal</Button>
+                            </div>
                         </form>
                     </Form>
                 </CardContent>
