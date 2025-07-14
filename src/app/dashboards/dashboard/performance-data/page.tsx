@@ -72,6 +72,10 @@ export default function PerformanceDataPage() {
     router.push(`/dashboards/dashboard/submit-report?edit=${reportId}`);
   };
 
+  const isEditable = (status: ReportStatus) => {
+    return status === 'Tertunda' || status === 'Ditolak';
+  }
+
   return (
     <div className="space-y-6 animate-in fade-in-50">
       <div>
@@ -122,13 +126,13 @@ export default function PerformanceDataPage() {
                     <TooltipProvider>
                        <Tooltip>
                           <TooltipTrigger asChild>
-                             <Button variant="ghost" size="icon" onClick={() => handleEditClick(report.id)} disabled={report.status !== 'Tertunda'}>
+                             <Button variant="ghost" size="icon" onClick={() => handleEditClick(report.id)} disabled={!isEditable(report.status)}>
                                 <Pencil className="h-4 w-4" />
                                 <span className="sr-only">Edit Laporan</span>
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>{report.status === 'Tertunda' ? 'Edit Laporan' : 'Laporan tidak dapat diedit'}</p>
+                            <p>{isEditable(report.status) ? 'Edit Laporan' : 'Laporan tidak dapat diedit'}</p>
                           </TooltipContent>
                         </Tooltip>
                       <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedReport(null)}>
@@ -215,7 +219,7 @@ export default function PerformanceDataPage() {
                              <Button
                               variant="secondary"
                               onClick={() => handleEditClick(selectedReport.id)}
-                              disabled={selectedReport.status !== 'Tertunda'}
+                              disabled={!isEditable(selectedReport.status)}
                             >
                               <Pencil className="mr-2 h-4 w-4" />
                               Edit
