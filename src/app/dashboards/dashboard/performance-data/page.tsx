@@ -212,6 +212,14 @@ export default function PerformanceDataPage() {
                             )}
                           </div>
                           <DialogFooter>
+                             <Button
+                              variant="secondary"
+                              onClick={() => handleEditClick(selectedReport.id)}
+                              disabled={selectedReport.status !== 'Tertunda'}
+                            >
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </Button>
                             <Button variant="outline" onClick={() => setSelectedReport(null)}>Tutup</Button>
                           </DialogFooter>
                         </DialogContent>
