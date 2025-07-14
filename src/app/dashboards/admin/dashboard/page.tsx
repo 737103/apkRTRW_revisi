@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Eye, CheckCircle, Clock, Users, Megaphone, ArrowRight, XCircle, Check, FileText } from "lucide-react";
+import { Eye, CheckCircle, Clock, Users, Megaphone, ArrowRight, XCircle, Check, FileText, MessageSquarePlus } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 const REPORTS_STORAGE_KEY = 'rt-rw-reports';
 const USERS_STORAGE_KEY = 'rt-rw-users';
@@ -40,6 +42,7 @@ interface Report {
   fotoKegiatan: string;
   submissionDate: string;
   status: ReportStatus;
+  notes?: string;
 }
 
 export default function AdminDashboardPage() {
@@ -47,6 +50,8 @@ export default function AdminDashboardPage() {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [userCount, setUserCount] = useState(0);
   const [announcementCount, setAnnouncementCount] = useState(0);
+  const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
+  const [noteContent, setNoteContent] = useState("");
   const { toast } = useToast();
 
   const fetchReports = () => {
@@ -80,6 +85,12 @@ export default function AdminDashboardPage() {
         console.error("Failed to load dashboard data from localStorage", error);
     }
   }, []);
+  
+  const handleDialogClose = () => {
+    setSelectedReport(null);
+    setIsNoteDialogOpen(false);
+    setNoteContent("");
+  };
 
   const updateReportStatus = (reportId: string, status: ReportStatus) => {
     try {
@@ -110,6 +121,46 @@ export default function AdminDashboardPage() {
         });
     }
   }
+  
+  const handleSaveNote = () => {
+    if (!selectedReport) return;
+    
+    try {
+        const storedReports = localStorage.getItem(REPORTS_STORAGE_KEY);
+        if (!storedReports) return;
+
+        let reports: Report[] = JSON.parse(storedReports);
+        const reportIndex = reports.findIndex(r => r.id === selectedReport.id);
+
+        if (reportIndex > -1) {
+            reports[reportIndex].notes = noteContent;
+            localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(reports));
+            
+            // Refresh local state
+            fetchReports();
+            setSelectedReport(prev => prev ? {...prev, notes: noteContent} : null);
+
+            toast({
+                title: "Catatan Disimpan",
+                description: "Catatan untuk laporan telah berhasil disimpan.",
+            });
+            setIsNoteDialogOpen(false);
+        }
+    } catch(error) {
+        console.error("Failed to save note", error);
+        toast({
+            title: "Gagal Menyimpan Catatan",
+            description: "Terjadi kesalahan saat menyimpan catatan.",
+            variant: "destructive",
+        });
+    }
+  };
+
+  const openNoteDialog = (report: Report) => {
+    setSelectedReport(report);
+    setNoteContent(report.notes || "");
+    setIsNoteDialogOpen(true);
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in-50">
@@ -270,8 +321,14 @@ export default function AdminDashboardPage() {
                                     <p className="text-sm text-muted-foreground">Tidak ada foto dilampirkan.</p>
                                 )}
                             </div>
+                            {selectedReport.notes && (
+                                <div className="space-y-1 mt-4 pt-4 border-t">
+                                    <p className="text-sm font-medium text-muted-foreground">Catatan dari Admin</p>
+                                    <p className="text-sm p-3 bg-muted/50 rounded-md whitespace-pre-wrap">{selectedReport.notes}</p>
+                                </div>
+                            )}
                           </div>
-                          <DialogFooter className="justify-between">
+                          <DialogFooter className="justify-between sm:justify-between items-center gap-2 flex-wrap">
                             <div className="flex gap-2">
                                 <Button variant="destructive" onClick={() => updateReportStatus(selectedReport.id, 'Ditolak')}>
                                     <XCircle className="mr-2 h-4 w-4" /> Tolak
@@ -279,8 +336,13 @@ export default function AdminDashboardPage() {
                                 <Button variant="default" className="bg-accent hover:bg-accent/90" onClick={() => updateReportStatus(selectedReport.id, 'Disetujui')}>
                                     <Check className="mr-2 h-4 w-4" /> Setujui
                                 </Button>
+                                <Button variant="secondary" onClick={() => openNoteDialog(selectedReport)}>
+                                    <MessageSquarePlus className="mr-2 h-4 w-4" /> Catatan
+                                </Button>
                             </div>
-                            <Button variant="outline" onClick={() => setSelectedReport(null)}>Tutup</Button>
+                            <DialogClose asChild>
+                                <Button variant="outline">Tutup</Button>
+                            </DialogClose>
                           </DialogFooter>
                         </DialogContent>
                       )}
@@ -293,6 +355,35 @@ export default function AdminDashboardPage() {
           )}
         </CardContent>
       </Card>
+      
+      <Dialog open={isNoteDialogOpen} onOpenChange={setIsNoteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Tambah/Edit Catatan</DialogTitle>
+            <DialogDescription>
+              Berikan catatan untuk laporan dari {selectedReport?.namaLengkap}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="note" className="text-right">
+                Catatan
+              </Label>
+              <Textarea
+                id="note"
+                value={noteContent}
+                onChange={(e) => setNoteContent(e.target.value)}
+                className="col-span-3 min-h-[100px]"
+                placeholder="Tulis catatan di sini..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsNoteDialogOpen(false)}>Batal</Button>
+            <Button type="submit" onClick={handleSaveNote}>Simpan Catatan</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -38,6 +38,7 @@ interface Report {
   fotoKegiatan: string;
   submissionDate: string;
   status: ReportStatus;
+  notes?: string;
 }
 
 export default function PerformanceDataPage() {
@@ -183,6 +184,12 @@ export default function PerformanceDataPage() {
                                     <p className="text-sm text-muted-foreground">Tidak ada foto dilampirkan.</p>
                                 )}
                             </div>
+                            {selectedReport.notes && (
+                                <div className="space-y-1 mt-4 pt-4 border-t">
+                                    <p className="text-sm font-medium text-muted-foreground">Catatan dari Admin</p>
+                                    <p className="text-sm p-3 bg-muted/50 rounded-md whitespace-pre-wrap">{selectedReport.notes}</p>
+                                </div>
+                            )}
                           </div>
                           <DialogFooter>
                             <Button variant="outline" onClick={() => setSelectedReport(null)}>Tutup</Button>
@@ -201,3 +208,5 @@ export default function PerformanceDataPage() {
     </div>
   );
 }
+
+    
