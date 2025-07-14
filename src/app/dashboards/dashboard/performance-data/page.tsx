@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +17,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
 
 const REPORTS_STORAGE_KEY = 'rt-rw-reports';
 const LOGGED_IN_USER_KEY = 'rt-rw-logged-in-user';
@@ -117,7 +116,7 @@ export default function PerformanceDataPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <span className="text-sm text-muted-foreground italic">{report.notes || "-"}</span>
+                    <span className="text-sm text-muted-foreground italic truncate max-w-[150px] inline-block">{report.notes || "-"}</span>
                   </TableCell>
                   <TableCell className="text-right space-x-1">
                     <TooltipProvider>

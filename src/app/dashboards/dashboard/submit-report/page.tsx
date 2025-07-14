@@ -38,6 +38,7 @@ const formSchema = z.object({
     fotoKegiatan: z.any().refine(file => file, "Foto kegiatan harus diunggah."),
     submissionDate: z.string().optional(),
     status: z.string().optional(),
+    notes: z.string().optional(),
 }).refine(data => {
     if (data.jenisKegiatan === 'lainnya') {
         return !!data.deskripsiLainnya && data.deskripsiLainnya.length > 0;
@@ -100,6 +101,7 @@ export default function ReportSubmissionPage() {
                 }
             } catch (error) {
                 console.error("Failed to load report for editing", error);
+                toast({ title: "Gagal memuat laporan untuk diedit", variant: "destructive"});
             }
         }
     }, [editId, form, router, toast]);
@@ -201,8 +203,11 @@ export default function ReportSubmissionPage() {
             const storedReports = localStorage.getItem(REPORTS_STORAGE_KEY);
             let reports = storedReports ? JSON.parse(storedReports) : [];
             
-            if (isEditMode) {
-                 reports = reports.map((r: any) => r.id === values.id ? values : r);
+            if (isEditMode && values.id) {
+                 const index = reports.findIndex((r: any) => r.id === values.id);
+                 if (index !== -1) {
+                    reports[index] = { ...reports[index], ...values };
+                 }
                  toast({
                     title: "Laporan Berhasil Diperbarui!",
                     description: "Perubahan pada laporan kinerja Anda telah disimpan.",
