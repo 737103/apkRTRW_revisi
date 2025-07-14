@@ -9,13 +9,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Eye, CheckCircle, Clock, Users, Megaphone, ArrowRight, XCircle, Check, FileText, MessageSquarePlus } from "lucide-react";
+import { Eye, CheckCircle, Clock, Users, Megaphone, ArrowRight, XCircle, Check, FileText, MessageSquarePlus, Trash2 } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
@@ -161,6 +162,32 @@ export default function AdminDashboardPage() {
     setNoteContent(report.notes || "");
     setIsNoteDialogOpen(true);
   };
+  
+  const deleteReport = (reportId: string) => {
+     try {
+        const storedReports = localStorage.getItem(REPORTS_STORAGE_KEY);
+        if (!storedReports) return;
+        
+        let reports: Report[] = JSON.parse(storedReports);
+        const updatedReports = reports.filter(report => report.id !== reportId);
+        
+        localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(updatedReports));
+        setReports(updatedReports.reverse());
+
+        toast({
+            title: "Laporan Dihapus",
+            description: "Laporan telah berhasil dihapus secara permanen.",
+            variant: "default",
+        });
+    } catch (error) {
+        console.error("Failed to delete report", error);
+        toast({
+            title: "Gagal Menghapus",
+            description: "Terjadi kesalahan saat menghapus laporan.",
+            variant: "destructive",
+        });
+    }
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in-50">
@@ -245,7 +272,7 @@ export default function AdminDashboardPage() {
                         {report.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right space-x-2">
                     <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedReport(null)}>
                       <TooltipProvider>
                         <Tooltip>
@@ -347,6 +374,35 @@ export default function AdminDashboardPage() {
                         </DialogContent>
                       )}
                     </Dialog>
+                    <AlertDialog>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                              <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                      <Trash2 className="h-4 w-4" />
+                                      <span className="sr-only">Hapus</span>
+                                  </Button>
+                              </AlertDialogTrigger>
+                          </TooltipTrigger>
+                           <TooltipContent>
+                              <p>Hapus Laporan</p>
+                           </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <AlertDialogContent>
+                          <AlertDialogHeader>
+                          <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                              Tindakan ini tidak dapat diurungkan. Ini akan menghapus laporan secara permanen.
+                          </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                          <AlertDialogCancel>Batal</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => deleteReport(report.id)} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
+                          </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </TableCell>
                 </TableRow>
               ))}
@@ -387,5 +443,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-    
