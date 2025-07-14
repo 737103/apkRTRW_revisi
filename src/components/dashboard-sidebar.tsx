@@ -31,7 +31,7 @@ export function DashboardSidebar() {
     <aside className="hidden md:flex w-64 flex-col border-r bg-card p-4">
         <div className="flex items-center gap-3 mb-8 px-2">
             <Building className="h-8 w-8 text-primary" />
-            <h1 className="text-xl font-bold tracking-tight">RT RW Tracker</h1>
+            <h1 className="text-xl font-bold tracking-tight">Aplikasi Penilaian RT RW</h1>
         </div>
         <nav className="flex-1 space-y-1">
             {navLinks.map((link) => (
