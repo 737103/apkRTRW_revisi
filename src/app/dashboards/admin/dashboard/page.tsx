@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Eye, CheckCircle, Clock, Users, Megaphone, ArrowRight, XCircle, Check } from "lucide-react";
+import { Eye, CheckCircle, Clock, Users, Megaphone, ArrowRight, XCircle, Check, FileText } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -296,3 +296,5 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
+    
