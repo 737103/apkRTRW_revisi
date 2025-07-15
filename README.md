@@ -1,4 +1,4 @@
-# Aplikasi Penilaian Kinerja RT/RW
+clon# Aplikasi Penilaian Kinerja RT/RW
 
 Ini adalah aplikasi Next.js untuk melacak dan menilai kinerja pengurus RT dan RW.
 
@@ -17,7 +17,7 @@ Buka [http://localhost:3000](http://localhost:3000) di browser Anda untuk meliha
 Aplikasi ini dikonfigurasi untuk di-deploy menggunakan Firebase App Hosting.
 
 1.  **Install Firebase CLI:**
-    Jika Anda belum menginstalnya, install Firebase CLI secara global dengan perintah:
+    Jika Anda belum menginstalnya, install Firebase CLI secara global dengan perintah:e
     ```bash
     npm install -g firebase-tools
     ```
