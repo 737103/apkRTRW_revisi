@@ -435,5 +435,4 @@ export default function AdminDashboardPage() {
       </Dialog>
     </div>
   );
-
-    
+}
