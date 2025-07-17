@@ -37,7 +37,7 @@ export function LoginForm() {
             const adminCredsDocRef = doc(db, "config", "admin_credentials");
             const adminSnap = await getDoc(adminCredsDocRef);
             if (!adminSnap.exists()) {
-                await setDoc(adminCredsDocRef, { username: 'admin', password: '123456' });
+                await setDoc(adminCredsDocRef, { username: 'admin', password: '123' });
             }
 
             // Seed Demo User

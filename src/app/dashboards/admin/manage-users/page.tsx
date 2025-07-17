@@ -128,7 +128,9 @@ export default function ManageUsersPage() {
           form.setError("password", { type: "manual", message: "Password harus diisi untuk pengguna baru." });
           return;
         }
-        await addDoc(usersCollection, values);
+        const docRef = await addDoc(usersCollection, values);
+        await updateDoc(docRef, { id: docRef.id });
+
         toast({
             title: "Pengguna Ditambahkan",
             description: `Pengguna "${values.fullName}" berhasil dibuat.`,
