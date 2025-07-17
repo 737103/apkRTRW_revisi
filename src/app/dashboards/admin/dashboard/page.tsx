@@ -57,15 +57,14 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const listeners: (() => void)[] = [];
 
-    // Use a simpler ref to fetch all reports, then sort on client.
-    // This is more robust if server-side indexes are not deployed.
+    // Fetch all reports and sort on the client side to avoid permission issues with un-indexed queries.
     const reportsListener = onValue(reportsRef, (snapshot) => {
         const data = snapshot.val();
         const reportsData: Report[] = [];
         if(data) {
             Object.keys(data).forEach(key => reportsData.push({ id: key, ...data[key] }));
         }
-        // Sort on the client-side
+        // Sort on the client-side by date, most recent first.
         setReports(reportsData.sort((a,b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()));
     }, (error) => {
       console.error("Failed to load reports:", error);
@@ -444,5 +443,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-    
