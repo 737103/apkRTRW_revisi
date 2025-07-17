@@ -4,27 +4,21 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { collection, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Eye, CheckCircle, Clock, Users, Megaphone, ArrowRight, XCircle, Check, FileText, MessageSquarePlus, Trash2 } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-
-const REPORTS_STORAGE_KEY = 'rt-rw-reports';
-const USERS_STORAGE_KEY = 'rt-rw-users';
-const ANNOUNCEMENTS_STORAGE_KEY = 'rt-rw-announcements';
 
 type ReportStatus = 'Tertunda' | 'Disetujui' | 'Ditolak';
 interface Report {
@@ -55,36 +49,36 @@ export default function AdminDashboardPage() {
   const [noteContent, setNoteContent] = useState("");
   const { toast } = useToast();
 
-  const fetchReports = () => {
+  const reportsCollection = collection(db, "reports");
+  const usersCollection = collection(db, "users");
+  const announcementsCollection = collection(db, "announcements");
+
+  const fetchDashboardData = async () => {
     try {
-      const storedReports = localStorage.getItem(REPORTS_STORAGE_KEY);
-      if (storedReports) {
-        const parsedReports = JSON.parse(storedReports).map((report: any) => ({
-            ...report,
-            status: report.status || 'Tertunda'
-        }));
-        setReports(parsedReports.reverse()); 
-      }
+      const reportsQuery = query(reportsCollection, orderBy("submissionDate", "desc"));
+      const [reportsSnapshot, usersSnapshot, announcementsSnapshot] = await Promise.all([
+        getDocs(reportsQuery),
+        getDocs(usersCollection),
+        getDocs(announcementsCollection),
+      ]);
+      
+      const reportsData = reportsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Report[];
+      setReports(reportsData);
+      setUserCount(usersSnapshot.size);
+      setAnnouncementCount(announcementsSnapshot.size);
+
     } catch (error) {
-        console.error("Failed to parse reports from localStorage", error);
+      console.error("Failed to load dashboard data from Firestore", error);
+       toast({
+        title: "Gagal Memuat Data Dasbor",
+        description: "Terjadi kesalahan saat memuat data dari server.",
+        variant: "destructive",
+      });
     }
   };
 
   useEffect(() => {
-    fetchReports();
-    try {
-      const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
-      if(storedUsers) {
-        setUserCount(JSON.parse(storedUsers).length);
-      }
-
-      const storedAnnouncements = localStorage.getItem(ANNOUNCEMENTS_STORAGE_KEY);
-      if(storedAnnouncements) {
-        setAnnouncementCount(JSON.parse(storedAnnouncements).length);
-      }
-    } catch (error) {
-        console.error("Failed to load dashboard data from localStorage", error);
-    }
+    fetchDashboardData();
   }, []);
   
   const handleDialogClose = () => {
@@ -93,26 +87,19 @@ export default function AdminDashboardPage() {
     setNoteContent("");
   };
 
-  const updateReportStatus = (reportId: string, status: ReportStatus) => {
+  const updateReportStatus = async (reportId: string, status: ReportStatus) => {
     try {
-        const storedReports = localStorage.getItem(REPORTS_STORAGE_KEY);
-        if (!storedReports) return;
+        const reportDoc = doc(db, "reports", reportId);
+        await updateDoc(reportDoc, { status });
+        
+        // Refresh local state
+        await fetchDashboardData();
+        setSelectedReport(prev => prev ? {...prev, status: status} : null);
 
-        let reports: Report[] = JSON.parse(storedReports);
-        const reportIndex = reports.findIndex(r => r.id === reportId);
-
-        if (reportIndex > -1) {
-            reports[reportIndex].status = status;
-            localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(reports));
-            // Refresh local state
-            fetchReports();
-            setSelectedReport(prev => prev ? {...prev, status: status} : null);
-
-            toast({
-                title: "Status Laporan Diperbarui",
-                description: `Laporan telah ditandai sebagai ${status}.`,
-            });
-        }
+        toast({
+            title: "Status Laporan Diperbarui",
+            description: `Laporan telah ditandai sebagai ${status}.`,
+        });
     } catch(error) {
         console.error("Failed to update report status", error);
         toast({
@@ -123,30 +110,22 @@ export default function AdminDashboardPage() {
     }
   }
   
-  const handleSaveNote = () => {
+  const handleSaveNote = async () => {
     if (!selectedReport) return;
     
     try {
-        const storedReports = localStorage.getItem(REPORTS_STORAGE_KEY);
-        if (!storedReports) return;
-
-        let reports: Report[] = JSON.parse(storedReports);
-        const reportIndex = reports.findIndex(r => r.id === selectedReport.id);
-
-        if (reportIndex > -1) {
-            reports[reportIndex].notes = noteContent;
-            localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(reports));
+        const reportDoc = doc(db, "reports", selectedReport.id);
+        await updateDoc(reportDoc, { notes: noteContent });
             
-            // Refresh local state
-            fetchReports();
-            setSelectedReport(prev => prev ? {...prev, notes: noteContent} : null);
+        // Refresh local state
+        await fetchDashboardData();
+        setSelectedReport(prev => prev ? {...prev, notes: noteContent} : null);
 
-            toast({
-                title: "Catatan Disimpan",
-                description: "Catatan untuk laporan telah berhasil disimpan.",
-            });
-            setIsNoteDialogOpen(false);
-        }
+        toast({
+            title: "Catatan Disimpan",
+            description: "Catatan untuk laporan telah berhasil disimpan.",
+        });
+        setIsNoteDialogOpen(false);
     } catch(error) {
         console.error("Failed to save note", error);
         toast({
@@ -163,16 +142,12 @@ export default function AdminDashboardPage() {
     setIsNoteDialogOpen(true);
   };
   
-  const deleteReport = (reportId: string) => {
+  const deleteReport = async (reportId: string) => {
      try {
-        const storedReports = localStorage.getItem(REPORTS_STORAGE_KEY);
-        if (!storedReports) return;
+        const reportDoc = doc(db, "reports", reportId);
+        await deleteDoc(reportDoc);
         
-        let reportsData: Report[] = JSON.parse(storedReports);
-        const updatedReports = reportsData.filter(report => report.id !== reportId);
-        
-        localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(updatedReports));
-        setReports(updatedReports.reverse());
+        await fetchDashboardData();
 
         toast({
             title: "Laporan Dihapus",

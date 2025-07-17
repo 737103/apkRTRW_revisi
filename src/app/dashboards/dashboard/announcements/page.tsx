@@ -4,28 +4,41 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Megaphone } from "lucide-react";
-
-const ANNOUNCEMENTS_STORAGE_KEY = 'rt-rw-announcements';
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Announcement {
   id: string;
   title: string;
   content: string;
   date: string;
+  createdAt: any;
 }
 
 export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const storedAnnouncements = localStorage.getItem(ANNOUNCEMENTS_STORAGE_KEY);
-      if (storedAnnouncements) {
-        setAnnouncements(JSON.parse(storedAnnouncements));
-      }
-    } catch (error) {
-      console.error("Failed to load announcements from localStorage", error);
-    }
+    const fetchAnnouncements = async () => {
+        setIsLoading(true);
+        try {
+            const announcementsCollection = collection(db, "announcements");
+            const q = query(announcementsCollection, orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(q);
+            const announcementsData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            })) as Announcement[];
+            setAnnouncements(announcementsData);
+        } catch (error) {
+            console.error("Failed to load announcements from Firestore", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    fetchAnnouncements();
   }, []);
 
   return (
@@ -35,7 +48,13 @@ export default function AnnouncementsPage() {
             <p className="text-lg text-muted-foreground">Informasi penting dan terbaru dari pengurus untuk Anda.</p>
         </div>
         
-        {announcements.length > 0 ? (
+        {isLoading ? (
+            <div className="space-y-4">
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+            </div>
+        ) : announcements.length > 0 ? (
             <div className="space-y-4">
                 {announcements.map((ann) => (
                     <Card key={ann.id} className="shadow-md hover:shadow-lg transition-shadow">

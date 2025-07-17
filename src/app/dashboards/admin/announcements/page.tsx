@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { PlusCircle, Trash2, Megaphone, Pencil } from "lucide-react";
+import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, orderBy } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,39 +17,52 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-
-const ANNOUNCEMENTS_STORAGE_KEY = 'rt-rw-announcements';
+import { Skeleton } from "@/components/ui/skeleton";
 
 const announcementSchema = z.object({
   id: z.string().optional(),
   title: z.string().min(5, { message: "Judul harus diisi (minimal 5 karakter)." }),
   content: z.string().min(10, { message: "Konten pengumuman harus diisi (minimal 10 karakter)." }),
   date: z.string().optional(),
+  createdAt: z.any().optional(),
 });
 
-type Announcement = z.infer<typeof announcementSchema> & { id: string, date: string };
+type Announcement = z.infer<typeof announcementSchema> & { id: string, date: string, createdAt: any };
 
 export default function ManageAnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  
+  const announcementsCollection = collection(db, "announcements");
 
-  useEffect(() => {
+  const fetchAnnouncements = async () => {
+    setIsLoading(true);
     try {
-      const storedAnnouncements = localStorage.getItem(ANNOUNCEMENTS_STORAGE_KEY);
-      if (storedAnnouncements) {
-        setAnnouncements(JSON.parse(storedAnnouncements));
-      }
+      const q = query(announcementsCollection, orderBy("createdAt", "desc"));
+      const querySnapshot = await getDocs(q);
+      const announcementsData = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Announcement[];
+      setAnnouncements(announcementsData);
     } catch (error) {
-      console.error("Failed to load announcements from localStorage", error);
+      console.error("Failed to load announcements from Firestore", error);
       toast({
         title: "Gagal Memuat Data",
         description: "Tidak dapat memuat daftar pengumuman.",
         variant: "destructive",
       });
+    } finally {
+        setIsLoading(false);
     }
-  }, [toast]);
+  };
+
+  useEffect(() => {
+    fetchAnnouncements();
+  }, []);
 
   const form = useForm<z.infer<typeof announcementSchema>>({
     resolver: zodResolver(announcementSchema),
@@ -67,7 +82,7 @@ export default function ManageAnnouncementsPage() {
 
   const handleEditClick = (announcement: Announcement) => {
     setEditingAnnouncement(announcement);
-    form.reset(announcement);
+    form.reset({ title: announcement.title, content: announcement.content });
     setIsDialogOpen(true);
   };
   
@@ -77,36 +92,31 @@ export default function ManageAnnouncementsPage() {
     setIsDialogOpen(true);
   }
 
-  const onSubmit = (values: z.infer<typeof announcementSchema>) => {
+  const onSubmit = async (values: z.infer<typeof announcementSchema>) => {
     try {
-      let updatedAnnouncements;
-      const announcementDate = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
-      
       if (editingAnnouncement) {
-        // Keep original date when editing, unless it's missing
-        updatedAnnouncements = announcements.map(a => 
-          a.id === editingAnnouncement.id 
-            ? { ...editingAnnouncement, ...values, date: a.date || announcementDate } 
-            : a
-        );
-         toast({
+        const announcementDoc = doc(db, "announcements", editingAnnouncement.id);
+        await updateDoc(announcementDoc, {
+            title: values.title,
+            content: values.content
+        });
+        toast({
           title: "Pengumuman Diperbarui",
           description: `Pengumuman "${values.title}" berhasil diperbarui.`,
         });
       } else {
-        const newAnnouncement: Announcement = { 
-            ...values, 
-            id: `announcement-${new Date().getTime()}`,
-            date: announcementDate
-        };
-        updatedAnnouncements = [newAnnouncement, ...announcements];
+        const announcementDate = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+        await addDoc(announcementsCollection, {
+            ...values,
+            date: announcementDate,
+            createdAt: new Date(),
+        });
         toast({
             title: "Pengumuman Diterbitkan",
-            description: `Pengumuman "${newAnnouncement.title}" berhasil diterbitkan.`,
+            description: `Pengumuman "${values.title}" berhasil diterbitkan.`,
         });
       }
-      setAnnouncements(updatedAnnouncements);
-      localStorage.setItem(ANNOUNCEMENTS_STORAGE_KEY, JSON.stringify(updatedAnnouncements));
+      fetchAnnouncements();
       handleDialogOpenChange(false);
     } catch (error) {
       console.error("Failed to save announcement", error);
@@ -118,16 +128,16 @@ export default function ManageAnnouncementsPage() {
     }
   };
 
-  const deleteAnnouncement = (announcementId: string) => {
+  const deleteAnnouncement = async (announcementId: string) => {
      try {
-        const updatedAnnouncements = announcements.filter(ann => ann.id !== announcementId);
-        setAnnouncements(updatedAnnouncements);
-        localStorage.setItem(ANNOUNCEMENTS_STORAGE_KEY, JSON.stringify(updatedAnnouncements));
+        const announcementDoc = doc(db, "announcements", announcementId);
+        await deleteDoc(announcementDoc);
         toast({
             title: "Pengumuman Dihapus",
             description: "Pengumuman telah berhasil dihapus.",
             variant: "default",
         });
+        fetchAnnouncements();
     } catch (error) {
         console.error("Failed to delete announcement", error);
         toast({
@@ -205,7 +215,13 @@ export default function ManageAnnouncementsPage() {
           <CardDescription>Berikut adalah daftar semua pengumuman yang telah diterbitkan.</CardDescription>
         </CardHeader>
         <CardContent>
-          {announcements.length > 0 ? (
+          {isLoading ? (
+             <div className="space-y-4">
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+            </div>
+          ) : announcements.length > 0 ? (
             <div className="space-y-4">
                 {announcements.map((ann) => (
                     <Card key={ann.id} className="bg-muted/30">

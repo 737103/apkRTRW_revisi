@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Home, Users, Megaphone, Settings, Building, LogOut, FileText, User } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -14,27 +14,41 @@ const LOGGED_IN_USER_KEY = 'rt-rw-logged-in-user';
 
 export function DashboardSidebar() {
   const pathname = usePathname();
-  const isAdmin = pathname.startsWith('/dashboards/admin');
+  const router = useRouter();
+  const [isAdmin, setIsAdmin] = useState(false);
   const [userInfo, setUserInfo] = useState<{ fullName: string; position: string } | null>(null);
 
   useEffect(() => {
+    const role = localStorage.getItem('rt-rw-role');
+    const isAdminRole = role === 'admin';
+    setIsAdmin(isAdminRole);
+
     try {
-      if (isAdmin) {
+      if (isAdminRole) {
         setUserInfo({ fullName: 'Admin', position: 'Administrator' });
-        return;
-      }
-      const loggedInUserStr = localStorage.getItem(LOGGED_IN_USER_KEY);
-      if (loggedInUserStr) {
-        const loggedInUser = JSON.parse(loggedInUserStr);
-        setUserInfo({
-          fullName: loggedInUser.fullName || 'Pengguna',
-          position: loggedInUser.position || 'Anggota'
-        });
+      } else {
+        const loggedInUserStr = localStorage.getItem(LOGGED_IN_USER_KEY);
+        if (loggedInUserStr) {
+          const loggedInUser = JSON.parse(loggedInUserStr);
+          setUserInfo({
+            fullName: loggedInUser.fullName || 'Pengguna',
+            position: loggedInUser.position || 'Anggota'
+          });
+        } else {
+          router.push('/'); // Redirect if no user data found for user role
+        }
       }
     } catch (error) {
       console.error("Failed to load user info from localStorage", error);
+      router.push('/');
     }
-  }, [isAdmin]);
+  }, [pathname, router]);
+
+  const handleLogout = () => {
+    localStorage.removeItem(LOGGED_IN_USER_KEY);
+    localStorage.removeItem('rt-rw-role');
+    router.push('/');
+  }
 
   const adminLinks = [
     { href: '/dashboards/admin/manage-users', label: 'Kelola Pengguna', icon: Users },
@@ -50,6 +64,10 @@ export function DashboardSidebar() {
   const baseDashboardLink = { href: isAdmin ? '/dashboards/admin/dashboard' : '/dashboards/dashboard', label: 'Dasbor', icon: Home };
 
   const navLinks = isAdmin ? [baseDashboardLink, ...adminLinks] : [baseDashboardLink, ...userLinks];
+
+  if (!userInfo) {
+    return null; // or a loading skeleton
+  }
 
   return (
     <aside className="hidden md:flex w-64 flex-col border-r bg-card p-4">
@@ -88,11 +106,9 @@ export function DashboardSidebar() {
         </nav>
         <div className="mt-auto">
           <Separator className="my-2" />
-          <Button variant="ghost" className="w-full justify-start text-base h-11" asChild>
-            <Link href="/">
+          <Button variant="ghost" className="w-full justify-start text-base h-11" onClick={handleLogout}>
               <LogOut className="mr-3 h-5 w-5" />
               Keluar
-            </Link>
           </Button>
         </div>
     </aside>

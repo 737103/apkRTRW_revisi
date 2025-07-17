@@ -4,6 +4,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Building, LogIn, Shield, User } from 'lucide-react';
+import { collection, getDocs, query, where, doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +14,6 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from "@/hooks/use-toast";
 
-const USERS_STORAGE_KEY = 'rt-rw-users';
-const ADMIN_CREDS_STORAGE_KEY = 'rt-rw-admin-credentials';
 const LOGGED_IN_USER_KEY = 'rt-rw-logged-in-user';
 
 export function LoginForm() {
@@ -32,43 +32,56 @@ export function LoginForm() {
   const [adminCreds, setAdminCreds] = useState({ username: 'admin', password: '123456' });
 
   useEffect(() => {
-    try {
-      // Pre-populate admin credentials for demo purposes
-      if (!localStorage.getItem(ADMIN_CREDS_STORAGE_KEY)) {
-        localStorage.setItem(ADMIN_CREDS_STORAGE_KEY, JSON.stringify({ username: 'admin', password: '123456' }));
-      }
-      
-      const storedCreds = localStorage.getItem(ADMIN_CREDS_STORAGE_KEY);
-      if (storedCreds) {
-          setAdminCreds(JSON.parse(storedCreds));
-      }
+    // This function seeds the database with initial data if it's empty
+    const seedInitialData = async () => {
+        try {
+            // Seed Admin Credentials
+            const adminCredsDoc = doc(db, "config", "admin_credentials");
+            const adminSnap = await getDoc(adminCredsDoc);
+            if (!adminSnap.exists()) {
+                await setDoc(adminCredsDoc, { username: 'admin', password: '123456' });
+                setAdminCreds({ username: 'admin', password: '123456' });
+            } else {
+                setAdminCreds(adminSnap.data() as any);
+            }
 
-      // Pre-populate a demo user if none exist
-      if (!localStorage.getItem(USERS_STORAGE_KEY)) {
-        const demoUser = {
-          id: 'user-01',
-          username: 'user',
-          password: '123',
-          fullName: 'Budi Santoso',
-          position: 'Ketua RT',
-          rt: '001',
-          rw: '005'
-        };
-        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify([demoUser]));
-      }
+            // Seed Demo User
+            const usersCollection = collection(db, "users");
+            const usersSnap = await getDocs(query(usersCollection));
+            if (usersSnap.empty) {
+                const demoUser = {
+                    id: 'user-01',
+                    username: 'user',
+                    password: '123',
+                    fullName: 'Budi Santoso',
+                    position: 'Ketua RT',
+                    rt: '001',
+                    rw: '005'
+                };
+                await setDoc(doc(usersCollection, demoUser.id), demoUser);
+            }
+        } catch (error) {
+            console.error("Failed to seed initial data:", error);
+            toast({
+                title: "Inisialisasi Gagal",
+                description: "Gagal menyiapkan data awal aplikasi.",
+                variant: "destructive",
+            });
+        }
+    };
+    seedInitialData();
+  }, [toast]);
 
-    } catch (error) {
-      console.error("Failed to initialize credentials from localStorage", error);
-    }
-  }, []);
-
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
         if (role === 'admin') {
-            if (adminUsername === adminCreds.username && adminPassword === adminCreds.password) {
-                // Clear any logged in user session
+            const adminCredsDoc = doc(db, "config", "admin_credentials");
+            const adminSnap = await getDoc(adminCredsDoc);
+            const creds = adminSnap.data();
+            if (creds && adminUsername === creds.username && adminPassword === creds.password) {
                 localStorage.removeItem(LOGGED_IN_USER_KEY);
+                localStorage.setItem('rt-rw-role', 'admin');
                 router.push('/dashboards/admin/dashboard');
             } else {
                 toast({
@@ -78,24 +91,23 @@ export function LoginForm() {
                 })
             }
         } else {
-            const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
-            if (storedUsers) {
-                const users = JSON.parse(storedUsers);
-                const foundUser = users.find((user: any) => user.username === userUsername && user.password === userPassword);
-                if (foundUser) {
-                    localStorage.setItem(LOGGED_IN_USER_KEY, JSON.stringify(foundUser));
-                    router.push('/dashboards/dashboard');
-                } else {
-                    toast({
-                        title: "Login Gagal",
-                        description: "Username atau password pengguna salah.",
-                        variant: "destructive",
-                    });
-                }
+            const usersCollection = collection(db, "users");
+            const q = query(
+                usersCollection, 
+                where("username", "==", userUsername), 
+                where("password", "==", userPassword)
+            );
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+                const foundUser = { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() };
+                localStorage.setItem(LOGGED_IN_USER_KEY, JSON.stringify(foundUser));
+                localStorage.setItem('rt-rw-role', 'user');
+                router.push('/dashboards/dashboard');
             } else {
                 toast({
                     title: "Login Gagal",
-                    description: "Tidak ada pengguna terdaftar. Silakan hubungi admin.",
+                    description: "Username atau password pengguna salah.",
                     variant: "destructive",
                 });
             }

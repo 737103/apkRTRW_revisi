@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 export const metadata: Metadata = {
   title: 'RT RW Performance Tracker',
   description: 'Aplikasi untuk memantau kinerja RT dan RW',
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({

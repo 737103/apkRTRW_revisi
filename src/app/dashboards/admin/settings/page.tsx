@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { KeyRound, User, Save } from "lucide-react";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,18 +15,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 
-const ADMIN_CREDS_STORAGE_KEY = 'rt-rw-admin-credentials';
-
 const settingsSchema = z.object({
   username: z.string().min(3, { message: "Username minimal 3 karakter." }),
   password: z.string().min(6, { message: "Password minimal 6 karakter." }).optional().or(z.literal('')),
   confirmPassword: z.string().optional(),
 }).refine(data => {
-  // Jika password diisi, maka konfirmasi password juga harus diisi dan harus cocok
   if (data.password) {
     return data.password === data.confirmPassword;
   }
-  // Jika password tidak diisi, tidak ada yang perlu divalidasi
   return true;
 }, {
   message: "Password tidak cocok. Silakan periksa kembali.",
@@ -46,42 +44,50 @@ export default function AdminSettingsPage() {
     },
   });
 
+  const adminCredsDoc = doc(db, "config", "admin_credentials");
+
   useEffect(() => {
-    try {
-      const storedCreds = localStorage.getItem(ADMIN_CREDS_STORAGE_KEY);
-      if (storedCreds) {
-        const creds = JSON.parse(storedCreds);
-        form.reset({ username: creds.username });
-      }
-    } catch (error) {
-      console.error("Failed to load admin credentials", error);
-       toast({
-        title: "Gagal Memuat Data",
-        description: "Tidak dapat memuat kredensial admin.",
-        variant: "destructive",
-      });
-    }
+    const loadAdminCreds = async () => {
+        try {
+            const docSnap = await getDoc(adminCredsDoc);
+            if (docSnap.exists()) {
+                const creds = docSnap.data();
+                form.reset({ username: creds.username });
+            }
+        } catch (error) {
+            console.error("Failed to load admin credentials", error);
+            toast({
+                title: "Gagal Memuat Data",
+                description: "Tidak dapat memuat kredensial admin.",
+                variant: "destructive",
+            });
+        }
+    };
+    loadAdminCreds();
   }, [form, toast]);
 
-  const onSubmit = (values: SettingsFormValues) => {
+  const onSubmit = async (values: SettingsFormValues) => {
     try {
-       const storedCreds = localStorage.getItem(ADMIN_CREDS_STORAGE_KEY);
-       const currentCreds = storedCreds ? JSON.parse(storedCreds) : {};
+       const docSnap = await getDoc(adminCredsDoc);
+       const currentCreds = docSnap.exists() ? docSnap.data() : {};
        
-       const newCreds = {
+       const newCreds: any = {
            username: values.username,
-           // Hanya update password jika diisi
-           password: values.password ? values.password : currentCreds.password
+       };
+       // Hanya update password jika diisi
+       if (values.password) {
+           newCreds.password = values.password;
+       } else {
+           newCreds.password = currentCreds.password;
        }
 
-       localStorage.setItem(ADMIN_CREDS_STORAGE_KEY, JSON.stringify(newCreds));
+       await setDoc(adminCredsDoc, newCreds);
 
        toast({
            title: "Pengaturan Disimpan",
            description: "Username dan password admin berhasil diperbarui.",
        });
 
-       // Reset form, terutama field password
        form.reset({
            ...form.getValues(),
            password: "",

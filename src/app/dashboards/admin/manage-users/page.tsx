@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from "react";
@@ -5,10 +6,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { PlusCircle, Trash2, UserPlus, Users, Pencil } from "lucide-react";
+import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,15 +19,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { Skeleton } from "@/components/ui/skeleton";
 
-
-const USERS_STORAGE_KEY = 'rt-rw-users';
 
 const userSchema = z.object({
   id: z.string().optional(),
   fullName: z.string().min(3, { message: "Nama lengkap harus diisi." }),
   username: z.string().min(3, { message: "Username harus diisi." }),
-  password: z.string().min(3, { message: "Password minimal 3 karakter." }),
+  password: z.string().min(3, { message: "Password minimal 3 karakter." }).optional().or(z.literal('')),
   position: z.string({ required_error: "Jabatan harus dipilih." }),
   rt: z.string().min(1, { message: "RT harus diisi." }),
   rw: z.string().min(1, { message: "RW harus diisi." }),
@@ -36,23 +38,35 @@ export default function ManageUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
+  const usersCollection = collection(db, "users");
+
+  const fetchUsers = async () => {
+    setIsLoading(true);
     try {
-      const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
-      if (storedUsers) {
-        setUsers(JSON.parse(storedUsers));
-      }
+      const querySnapshot = await getDocs(query(usersCollection));
+      const usersData = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as User[];
+      setUsers(usersData);
     } catch (error) {
-      console.error("Failed to load users from localStorage", error);
+      console.error("Failed to load users from Firestore", error);
       toast({
         title: "Gagal Memuat Data",
         description: "Tidak dapat memuat daftar pengguna.",
         variant: "destructive",
       });
+    } finally {
+        setIsLoading(false);
     }
-  }, [toast]);
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const form = useForm<z.infer<typeof userSchema>>({
     resolver: zodResolver(userSchema),
@@ -76,7 +90,7 @@ export default function ManageUsersPage() {
 
   const handleEditClick = (user: User) => {
     setEditingUser(user);
-    form.reset(user);
+    form.reset({ ...user, password: '' });
     setIsDialogOpen(true);
   };
   
@@ -93,25 +107,34 @@ export default function ManageUsersPage() {
     setIsDialogOpen(true);
   }
 
-  const onSubmit = (values: z.infer<typeof userSchema>) => {
+  const onSubmit = async (values: z.infer<typeof userSchema>) => {
     try {
-      let updatedUsers;
       if (editingUser) {
-        updatedUsers = users.map(u => u.id === editingUser.id ? { ...u, ...values } : u);
-         toast({
+        const userDoc = doc(db, "users", editingUser.id);
+        const { password, ...updateData } = values;
+        
+        const dataToUpdate: any = { ...updateData };
+        if (password) {
+            dataToUpdate.password = password;
+        }
+
+        await updateDoc(userDoc, dataToUpdate);
+        toast({
           title: "Pengguna Diperbarui",
           description: `Data untuk "${values.fullName}" berhasil diperbarui.`,
         });
       } else {
-        const newUser: User = { ...values, id: `user-${new Date().getTime()}` };
-        updatedUsers = [...users, newUser];
+        if (!values.password) {
+          form.setError("password", { type: "manual", message: "Password harus diisi untuk pengguna baru." });
+          return;
+        }
+        await addDoc(usersCollection, values);
         toast({
             title: "Pengguna Ditambahkan",
-            description: `Pengguna "${newUser.fullName}" berhasil dibuat.`,
+            description: `Pengguna "${values.fullName}" berhasil dibuat.`,
         });
       }
-      setUsers(updatedUsers);
-      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(updatedUsers));
+      fetchUsers();
       handleDialogOpenChange(false);
     } catch (error) {
       console.error("Failed to save user", error);
@@ -123,16 +146,16 @@ export default function ManageUsersPage() {
     }
   };
 
-  const deleteUser = (userId: string) => {
+  const deleteUser = async (userId: string) => {
      try {
-        const updatedUsers = users.filter(user => user.id !== userId);
-        setUsers(updatedUsers);
-        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(updatedUsers));
+        const userDoc = doc(db, "users", userId);
+        await deleteDoc(userDoc);
         toast({
             title: "Pengguna Dihapus",
             description: "Pengguna telah berhasil dihapus.",
             variant: "default",
         });
+        fetchUsers();
     } catch (error) {
         console.error("Failed to delete user", error);
         toast({
@@ -278,7 +301,13 @@ export default function ManageUsersPage() {
           <CardDescription>Berikut adalah daftar semua pengguna yang terdaftar di sistem.</CardDescription>
         </CardHeader>
         <CardContent>
-          {users.length > 0 ? (
+         {isLoading ? (
+            <div className="space-y-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+            </div>
+         ) : users.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>

@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FileText, Megaphone, ArrowRight } from "lucide-react";
+import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import {
   Dialog,
   DialogContent,
@@ -14,37 +16,49 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const LOGGED_IN_USER_KEY = 'rt-rw-logged-in-user';
-const ANNOUNCEMENTS_STORAGE_KEY = 'rt-rw-announcements';
 
 interface Announcement {
   id: string;
   title: string;
   content: string;
   date: string;
+  createdAt: any;
 }
 
 export default function UserDashboardPage() {
     const [userName, setUserName] = useState('');
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
 
     useEffect(() => {
-        try {
-            const loggedInUserStr = localStorage.getItem(LOGGED_IN_USER_KEY);
-            if (loggedInUserStr) {
-                const loggedInUser = JSON.parse(loggedInUserStr);
-                setUserName(loggedInUser.fullName || 'Pengguna');
-            }
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                const loggedInUserStr = localStorage.getItem(LOGGED_IN_USER_KEY);
+                if (loggedInUserStr) {
+                    const loggedInUser = JSON.parse(loggedInUserStr);
+                    setUserName(loggedInUser.fullName || 'Pengguna');
+                }
 
-            const storedAnnouncements = localStorage.getItem(ANNOUNCEMENTS_STORAGE_KEY);
-            if (storedAnnouncements) {
-                setAnnouncements(JSON.parse(storedAnnouncements));
+                const announcementsCollection = collection(db, "announcements");
+                const q = query(announcementsCollection, orderBy("createdAt", "desc"), limit(3));
+                const querySnapshot = await getDocs(q);
+                const announcementsData = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                })) as Announcement[];
+                setAnnouncements(announcementsData);
+            } catch (error) {
+                console.error("Failed to load data from localStorage or Firestore", error);
+            } finally {
+                setIsLoading(false);
             }
-        } catch (error) {
-            console.error("Failed to load data from localStorage", error);
-        }
+        };
+        fetchData();
     }, []);
 
     const handleAnnouncementClick = (announcement: Announcement) => {
@@ -91,9 +105,15 @@ export default function UserDashboardPage() {
                           </div>
                       </CardHeader>
                     <CardContent>
-                        {announcements.length > 0 ? (
+                        {isLoading ? (
                             <div className="space-y-4">
-                                {announcements.slice(0, 3).map((ann) => (
+                                <Skeleton className="h-20 w-full" />
+                                <Skeleton className="h-20 w-full" />
+                                <Skeleton className="h-20 w-full" />
+                            </div>
+                        ) : announcements.length > 0 ? (
+                            <div className="space-y-4">
+                                {announcements.map((ann) => (
                                     <div 
                                       key={ann.id} 
                                       className="p-4 rounded-lg border bg-muted/50 hover:bg-muted transition-colors cursor-pointer"

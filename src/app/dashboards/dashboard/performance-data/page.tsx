@@ -10,15 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Eye, CheckCircle, Clock, XCircle, Pencil } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
-const REPORTS_STORAGE_KEY = 'rt-rw-reports';
 const LOGGED_IN_USER_KEY = 'rt-rw-logged-in-user';
 
 type ReportStatus = 'Tertunda' | 'Disetujui' | 'Ditolak';
@@ -45,28 +43,44 @@ interface Report {
 export default function PerformanceDataPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
-    try {
-      const loggedInUserStr = localStorage.getItem(LOGGED_IN_USER_KEY);
-      if(!loggedInUserStr) return;
-      const loggedInUser = JSON.parse(loggedInUserStr);
+    const fetchUserReports = async () => {
+      setIsLoading(true);
+      try {
+        const loggedInUserStr = localStorage.getItem(LOGGED_IN_USER_KEY);
+        if(!loggedInUserStr) {
+            toast({ title: "Sesi tidak ditemukan", description: "Silakan login kembali.", variant: "destructive"});
+            router.push('/');
+            return;
+        };
+        const loggedInUser = JSON.parse(loggedInUserStr);
 
-      const storedReports = localStorage.getItem(REPORTS_STORAGE_KEY);
-      if (storedReports) {
-        const allReports = JSON.parse(storedReports);
-        const userReports = allReports.filter((report: any) => report.namaLengkap === loggedInUser.fullName)
-          .map((report: any) => ({
-              ...report,
-              status: report.status || 'Tertunda'
-          }));
-        setReports(userReports.reverse()); 
+        const reportsCollection = collection(db, "reports");
+        const q = query(
+            reportsCollection, 
+            where("userId", "==", loggedInUser.id),
+            orderBy("submissionDate", "desc")
+        );
+        
+        const querySnapshot = await getDocs(q);
+        const userReports = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Report[];
+        setReports(userReports);
+      } catch (error) {
+          console.error("Failed to parse reports from Firestore", error);
+          toast({ title: "Gagal memuat laporan", variant: "destructive"});
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-        console.error("Failed to parse reports from localStorage", error);
     }
-  }, []);
+    fetchUserReports();
+  }, [router, toast]);
   
   const handleEditClick = (reportId: string) => {
     router.push(`/dashboards/dashboard/submit-report?edit=${reportId}`);
@@ -89,7 +103,13 @@ export default function PerformanceDataPage() {
           <CardDescription>Berikut adalah semua laporan yang telah Anda kirimkan.</CardDescription>
         </CardHeader>
         <CardContent>
-          {reports.length === 0 ? (
+          {isLoading ? (
+            <div className="space-y-2">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+            </div>
+          ) : reports.length === 0 ? (
              <p className="text-muted-foreground text-center py-8">Anda belum mengirimkan laporan apapun.</p>
           ) : (
           <Table>
