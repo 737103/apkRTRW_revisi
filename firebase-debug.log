@@ -427,3 +427,160 @@ io.netty.handler.codec.http2.Http2Exception: HTTP/2 client preface string missin
 
 Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
  
+[debug] [2025-07-17T06:48:42.426Z] Eventarc emulator received unknown request at path / {"metadata":{"emulator":{"name":"eventarc"},"message":"Eventarc emulator received unknown request at path /"}}
+[debug] [2025-07-17T06:48:42.470Z] Jul 17, 2025 6:48:42 AM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel
+INFO: Connected to new websocket client
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Jul 17, 2025 6:48:42 AM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel\nINFO: Connected to new websocket client\n"}}
+[debug] [2025-07-17T06:48:42.505Z] Functions emulator received unknown request at path /
+[debug] [2025-07-17T06:48:42.551Z] Jul 17, 2025 6:48:42 AM io.grpc.netty.NettyServerTransport notifyTerminated
+INFO: Transport failed
+io.netty.handler.codec.http2.Http2Exception: Unexpected HTTP/1.x request: GET / 
+	at io.netty.handler.codec.http2.Http2Exception.connectionError(Http2Exception.java:107)
+	at io.netty.handler.codec.http2.Http2ConnectionHandler$PrefaceDecoder.readClientPrefaceString(Http2ConnectionHandler.java:315)
+	at io.netty.handler.codec.http2.Http2ConnectionHandler$PrefaceDecoder.decode(Http2ConnectionHandler.java:245)
+	at io.netty.handler.codec.http2.Http2ConnectionHandler.decode(Http2ConnectionHandler.java:451)
+	at io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:530)
+	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:469)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:290)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1407)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:918)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:994)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Jul 17, 2025 6:48:42 AM io.grpc.netty.NettyServerTransport notifyTerminated\nINFO: Transport failed\nio.netty.handler.codec.http2.Http2Exception: Unexpected HTTP/1.x request: GET / \n\tat io.netty.handler.codec.http2.Http2Exception.connectionError(Http2Exception.java:107)\n\tat io.netty.handler.codec.http2.Http2ConnectionHandler$PrefaceDecoder.readClientPrefaceString(Http2ConnectionHandler.java:315)\n\tat io.netty.handler.codec.http2.Http2ConnectionHandler$PrefaceDecoder.decode(Http2ConnectionHandler.java:245)\n\tat io.netty.handler.codec.http2.Http2ConnectionHandler.decode(Http2ConnectionHandler.java:451)\n\tat io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:530)\n\tat io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:469)\n\tat io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:290)\n\tat io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)\n\tat io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)\n\tat io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)\n\tat io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1407)\n\tat io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440)\n\tat io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)\n\tat io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:918)\n\tat io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)\n\tat io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788)\n\tat io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)\n\tat io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)\n\tat io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)\n\tat io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:994)\n\tat io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)\n\tat io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)\n\tat java.base/java.lang.Thread.run(Thread.java:1583)\n\n"}}
+[debug] [2025-07-17T06:48:42.597Z] Jul 17, 2025 6:48:42 AM io.grpc.netty.NettyServerTransport notifyTerminated
+INFO: Transport failed
+io.netty.handler.codec.http2.Http2Exception: HTTP/2 client preface string missing or corrupt. Hex dump for received bytes: 16030105a8010005a403038d59e6ece2101abbc1475b25d4
+	at io.netty.handler.codec.http2.Http2Exception.connectionError(Http2Exception.java:107)
+	at io.netty.handler.codec.http2.Http2ConnectionHandler$PrefaceDecoder.readClientPrefaceString(Http2ConnectionHandler.java:319)
+	at io.netty.handler.codec.http2.Http2ConnectionHandler$PrefaceDecoder.decode(Http2ConnectionHandler.java:245)
+	at io.netty.handler.codec.http2.Http2ConnectionHandler.decode(Http2ConnectionHandler.java:451)
+	at io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:530)
+	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:469)
+	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:290)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1407)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:918)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:994)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Jul 17, 2025 6:48:42 AM io.grpc.netty.NettyServerTransport notifyTerminated\nINFO: Transport failed\nio.netty.handler.codec.http2.Http2Exception: HTTP/2 client preface string missing or corrupt. Hex dump for received bytes: 16030105a8010005a403038d59e6ece2101abbc1475b25d4\n\tat io.netty.handler.codec.http2.Http2Exception.connectionError(Http2Exception.java:107)\n\tat io.netty.handler.codec.http2.Http2ConnectionHandler$PrefaceDecoder.readClientPrefaceString(Http2ConnectionHandler.java:319)\n\tat io.netty.handler.codec.http2.Http2ConnectionHandler$PrefaceDecoder.decode(Http2ConnectionHandler.java:245)\n\tat io.netty.handler.codec.http2.Http2ConnectionHandler.decode(Http2ConnectionHandler.java:451)\n\tat io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:530)\n\tat io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:469)\n\tat io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:290)\n\tat io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)\n\tat io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)\n\tat io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)\n\tat io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1407)\n\tat io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440)\n\tat io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)\n\tat io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:918)\n\tat io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)\n\tat io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788)\n\tat io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)\n\tat io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)\n\tat io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)\n\tat io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:994)\n\tat io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)\n\tat io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)\n\tat java.base/java.lang.Thread.run(Thread.java:1583)\n\n"}}
+[debug] [2025-07-17T06:48:42.622Z] Jul 17, 2025 6:48:42 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Jul 17, 2025 6:48:42 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[info] i  hosting: 127.0.0.1 - - [17/Jul/2025:06:48:42 +0000] "GET / HTTP/1.1" 200 - "https://studio.firebase.google.com/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [17/Jul/2025:06:48:42 +0000] \"GET / HTTP/1.1\" 200 - \"https://studio.firebase.google.com/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36\""}}
+[info] i  hosting: 127.0.0.1 - - [17/Jul/2025:06:48:42 +0000] "GET /_next/static/chunks/webpack-3a68ca926a023bb8.js HTTP/1.1" 200 - "https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [17/Jul/2025:06:48:42 +0000] \"GET /_next/static/chunks/webpack-3a68ca926a023bb8.js HTTP/1.1\" 200 - \"https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36\""}}
+[info] i  hosting: 127.0.0.1 - - [17/Jul/2025:06:48:42 +0000] "GET /_next/static/css/4ed4a50d18b48307.css HTTP/1.1" 200 - "https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [17/Jul/2025:06:48:42 +0000] \"GET /_next/static/css/4ed4a50d18b48307.css HTTP/1.1\" 200 - \"https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36\""}}
+[info] i  hosting: 127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] "GET /_next/static/chunks/4bd1b696-4419cc93057fcf32.js HTTP/1.1" 200 - "https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] \"GET /_next/static/chunks/4bd1b696-4419cc93057fcf32.js HTTP/1.1\" 200 - \"https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36\""}}
+[info] i  hosting: 127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] "GET /_next/static/chunks/874-4127c55c33267841.js HTTP/1.1" 200 - "https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] \"GET /_next/static/chunks/874-4127c55c33267841.js HTTP/1.1\" 200 - \"https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36\""}}
+[info] i  hosting: 127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] "GET /_next/static/chunks/app/not-found-2978e20c676e6362.js HTTP/1.1" 200 197 "https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] \"GET /_next/static/chunks/app/not-found-2978e20c676e6362.js HTTP/1.1\" 200 197 \"https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36\""}}
+[info] i  hosting: 127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] "GET /_next/static/chunks/main-app-9f4f66c0efa5e0b9.js HTTP/1.1" 200 518 "https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] \"GET /_next/static/chunks/main-app-9f4f66c0efa5e0b9.js HTTP/1.1\" 200 518 \"https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36\""}}
+[info] i  hosting: 127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] "GET /_next/static/chunks/769-bddbaa39c6bf697c.js HTTP/1.1" 200 - "https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] \"GET /_next/static/chunks/769-bddbaa39c6bf697c.js HTTP/1.1\" 200 - \"https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36\""}}
+[info] i  hosting: 127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] "GET /_next/static/chunks/684-7002d2f60d48787d.js HTTP/1.1" 200 - "https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] \"GET /_next/static/chunks/684-7002d2f60d48787d.js HTTP/1.1\" 200 - \"https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36\""}}
+[debug] [2025-07-17T06:48:43.558Z] Jul 17, 2025 6:48:43 AM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel
+INFO: Connected to new websocket client
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Jul 17, 2025 6:48:43 AM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel\nINFO: Connected to new websocket client\n"}}
+[info] i  hosting: 127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] "GET /_next/static/chunks/676-513e30157b4a6840.js HTTP/1.1" 200 - "https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] \"GET /_next/static/chunks/676-513e30157b4a6840.js HTTP/1.1\" 200 - \"https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36\""}}
+[info] i  hosting: 127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] "GET /_next/static/chunks/app/layout-397991c04e175d99.js HTTP/1.1" 200 - "https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] \"GET /_next/static/chunks/app/layout-397991c04e175d99.js HTTP/1.1\" 200 - \"https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36\""}}
+[info] i  hosting: 127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] "GET /_next/static/chunks/328-e83ccbbc999f7a2d.js HTTP/1.1" 200 - "https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] \"GET /_next/static/chunks/328-e83ccbbc999f7a2d.js HTTP/1.1\" 200 - \"https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36\""}}
+[info] i  hosting: 127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] "GET /_next/static/chunks/7c86ec74-d39f364963f0efb0.js HTTP/1.1" 200 - "https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] \"GET /_next/static/chunks/7c86ec74-d39f364963f0efb0.js HTTP/1.1\" 200 - \"https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36\""}}
+[info] i  hosting: 127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] "GET /_next/static/chunks/910-1d653c974bf49714.js HTTP/1.1" 200 - "https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] \"GET /_next/static/chunks/910-1d653c974bf49714.js HTTP/1.1\" 200 - \"https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36\""}}
+[info] i  hosting: 127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] "GET /_next/static/chunks/app/page-724438afb0a6b8cf.js HTTP/1.1" 200 - "https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] \"GET /_next/static/chunks/app/page-724438afb0a6b8cf.js HTTP/1.1\" 200 - \"https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36\""}}
+[info] i  hosting: 127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] "GET /_next/static/chunks/340-4ee0c4d5b144ef2d.js HTTP/1.1" 200 - "https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] \"GET /_next/static/chunks/340-4ee0c4d5b144ef2d.js HTTP/1.1\" 200 - \"https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36\""}}
+[info] i  hosting: 127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] "GET /_next/static/chunks/bc9e92e6-16037f8137808f8a.js HTTP/1.1" 200 - "https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [17/Jul/2025:06:48:43 +0000] \"GET /_next/static/chunks/bc9e92e6-16037f8137808f8a.js HTTP/1.1\" 200 - \"https://5000-firebase-studio-1752383617897.cluster-nzwlpk54dvagsxetkvxzbvslyi.cloudworkstations.dev/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36\""}}
+[debug] [2025-07-17T06:48:49.406Z] ----------------------------------------------------------------------
+[debug] [2025-07-17T06:48:49.414Z] Command:       /nix/store/ws50yvm6vzlzf7jzz6n7xh4szddrack1-nodejs-20.19.1/bin/node /home/user/.global_modules/bin/firebase deploy
+[debug] [2025-07-17T06:48:49.415Z] CLI Version:   14.10.1
+[debug] [2025-07-17T06:48:49.415Z] Platform:      linux
+[debug] [2025-07-17T06:48:49.418Z] Node Version:  v20.19.1
+[debug] [2025-07-17T06:48:49.418Z] Time:          Thu Jul 17 2025 06:48:49 GMT+0000 (Coordinated Universal Time)
+[debug] [2025-07-17T06:48:49.418Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-07-17T06:48:50.533Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-17T06:48:50.537Z] > authorizing via signed-in user (barabarayaselatan96@gmail.com)
+[debug] [2025-07-17T06:48:50.537Z] [iam] checking project aplikasirtrw-nuwr3 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2025-07-17T06:48:50.542Z] Checked if tokens are valid: true, expires at: 1752736410261
+[debug] [2025-07-17T06:48:50.543Z] Checked if tokens are valid: true, expires at: 1752736410261
+[debug] [2025-07-17T06:48:50.548Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/aplikasirtrw-nuwr3:testIamPermissions [none]
+[debug] [2025-07-17T06:48:50.548Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/aplikasirtrw-nuwr3:testIamPermissions x-goog-quota-user=projects/aplikasirtrw-nuwr3
+[debug] [2025-07-17T06:48:50.548Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/aplikasirtrw-nuwr3:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-07-17T06:48:50.843Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/aplikasirtrw-nuwr3:testIamPermissions 200
+[debug] [2025-07-17T06:48:50.846Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/aplikasirtrw-nuwr3:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-07-17T06:48:50.852Z] Checked if tokens are valid: true, expires at: 1752736410261
+[debug] [2025-07-17T06:48:50.852Z] Checked if tokens are valid: true, expires at: 1752736410261
+[debug] [2025-07-17T06:48:50.853Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/aplikasirtrw-nuwr3 [none]
+[debug] [2025-07-17T06:48:51.104Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/aplikasirtrw-nuwr3 200
+[debug] [2025-07-17T06:48:51.105Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/aplikasirtrw-nuwr3 {"projectId":"aplikasirtrw-nuwr3","projectNumber":"64245177816","displayName":"aplikasiRTRW","name":"projects/aplikasirtrw-nuwr3","resources":{"hostingSite":"aplikasirtrw-nuwr3","realtimeDatabaseInstance":"aplikasirtrw-nuwr3-default-rtdb"},"state":"ACTIVE","etag":"1_b8ab64aa-e42d-44c1-bc46-4a12aec9db19"}
+[debug] [2025-07-17T06:48:56.766Z] Checked if tokens are valid: true, expires at: 1752736410261
+[debug] [2025-07-17T06:48:56.766Z] Checked if tokens are valid: true, expires at: 1752736410261
+[debug] [2025-07-17T06:48:56.769Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/aplikasirtrw-nuwr3/sites pageToken=&pageSize=10
+[debug] [2025-07-17T06:48:57.175Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/aplikasirtrw-nuwr3/sites 200
+[debug] [2025-07-17T06:48:57.178Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/aplikasirtrw-nuwr3/sites {"sites":[{"name":"projects/aplikasirtrw-nuwr3/sites/aplikasirtrw-nuwr3","defaultUrl":"https://aplikasirtrw-nuwr3.web.app","appId":"1:64245177816:web:724c026756f4b2c6a0e6ad","type":"DEFAULT_SITE"}]}
+[debug] [2025-07-17T06:48:57.179Z] Checked if tokens are valid: true, expires at: 1752736410261
+[debug] [2025-07-17T06:48:57.179Z] Checked if tokens are valid: true, expires at: 1752736410261
+[debug] [2025-07-17T06:48:57.179Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:64245177816:web:724c026756f4b2c6a0e6ad/config [none]
+[debug] [2025-07-17T06:48:57.916Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:64245177816:web:724c026756f4b2c6a0e6ad/config 200
+[debug] [2025-07-17T06:48:57.920Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:64245177816:web:724c026756f4b2c6a0e6ad/config {"projectId":"aplikasirtrw-nuwr3","appId":"1:64245177816:web:724c026756f4b2c6a0e6ad","databaseURL":"https://aplikasirtrw-nuwr3-default-rtdb.firebaseio.com","storageBucket":"aplikasirtrw-nuwr3.firebasestorage.app","apiKey":"AIzaSyBkfrvAGcJvLdhVNlHw8wOhuCrjgX1Pfyk","authDomain":"aplikasirtrw-nuwr3.firebaseapp.com","messagingSenderId":"64245177816"}
+[info] 
+   Thank you for trying our early preview of Next.js support on Firebase Hosting.
+   During the preview, support is best-effort and breaking changes can be expected. Proceed with caution.
+   The integration is known to work with Next.js version 12 - 15.0. You may encounter errors.
+
+   Documentation: https://firebase.google.com/docs/hosting/frameworks/nextjs
+   File a bug: https://github.com/firebase/firebase-tools/issues/new?template=bug_report.md
+   Submit a feature request: https://github.com/firebase/firebase-tools/issues/new?template=feature_request.md
+
+   We'd love to learn from you. Express your interest in helping us shape the future of Firebase Hosting: https://goo.gle/41enW5X
+
+[debug] [2025-07-17T06:49:08.915Z] Checked if tokens are valid: true, expires at: 1752736410261
+[debug] [2025-07-17T06:49:08.926Z] Checked if tokens are valid: true, expires at: 1752736410261
+[debug] [2025-07-17T06:49:08.926Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/aplikasirtrw-nuwr3/sites/aplikasirtrw-nuwr3 [none]
+[debug] [2025-07-17T06:49:09.342Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/aplikasirtrw-nuwr3/sites/aplikasirtrw-nuwr3 200
+[debug] [2025-07-17T06:49:09.342Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/aplikasirtrw-nuwr3/sites/aplikasirtrw-nuwr3 {"name":"projects/aplikasirtrw-nuwr3/sites/aplikasirtrw-nuwr3","defaultUrl":"https://aplikasirtrw-nuwr3.web.app","appId":"1:64245177816:web:724c026756f4b2c6a0e6ad","type":"DEFAULT_SITE"}
+[info]    ▲ Next.js 15.3.3
+
+[info]    - Environments: .env.local
+
+
+[info]    Creating an optimized production build ...
+
+[info]  ✓ Compiled successfully in 35.0s
+
+[info]    Linting and checking validity of types ...
+
+[info]    Collecting page data ...
+
+[info]    Generating static pages (0/13) ...
+
+[info] Error occurred prerendering page "/dashboards/admin/announcements". Read more: https://nextjs.org/docs/messages/prerender-error
+FirebaseError: Expected first argument to collection() to be a CollectionReference, a DocumentReference or FirebaseFirestore
+Export encountered an error on /dashboards/admin/announcements/page: /dashboards/admin/announcements, exiting the build.
+
+[info]  ⨯ Next.js build worker exited with code: 1 and signal: null
+
+[debug] [2025-07-17T06:50:30.244Z] Error: ENOENT: no such file or directory, open '/home/user/studio/.next/export-marker.json'
+[error] 
+[error] Error: An unexpected error has occurred.
