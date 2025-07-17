@@ -67,10 +67,11 @@ export default function PerformanceDataPage() {
         }
 
         const reportsCollection = collection(db, "reports");
+        // Temporarily remove orderBy to allow the query to run while the index is building.
         const q = query(
             reportsCollection, 
-            where("userId", "==", loggedInUser.id),
-            orderBy("submissionDate", "desc")
+            where("userId", "==", loggedInUser.id)
+            // orderBy("submissionDate", "desc")
         );
         
         const querySnapshot = await getDocs(q);
@@ -80,9 +81,13 @@ export default function PerformanceDataPage() {
         })) as Report[];
 
         setReports(userReports);
-      } catch (error) {
-          console.error("Failed to parse reports from Firestore", error);
-          toast({ title: "Gagal memuat laporan", description: "Terjadi kesalahan saat mengambil data dari server.", variant: "destructive"});
+      } catch (error: any) {
+          console.error("Failed to load reports from Firestore", error);
+          if (error.code === 'failed-precondition') {
+             toast({ title: "Indeks sedang dibuat", description: "Database sedang menyiapkan data. Coba lagi dalam beberapa menit.", variant: "destructive"});
+          } else {
+             toast({ title: "Gagal memuat laporan", description: "Terjadi kesalahan saat mengambil data dari server.", variant: "destructive"});
+          }
       } finally {
         setIsLoading(false);
       }
@@ -101,12 +106,11 @@ export default function PerformanceDataPage() {
   const formatDate = (dateString: string) => {
     if (!dateString) return "Tanggal tidak tersedia";
     try {
-      const date = new Date(dateString);
-      // Check if the date is valid
-      if (isNaN(date.getTime())) {
-        return "Tanggal tidak valid";
+      // Check if dateString is a valid date representation
+      if (isNaN(new Date(dateString).getTime())) {
+          return "Format tanggal salah";
       }
-      return date.toLocaleDateString('id-ID', {
+      return new Date(dateString).toLocaleDateString('id-ID', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
