@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { rtdb } from "@/lib/firebase";
-import { ref, onValue, off, update, remove, set } from "firebase/database";
+import { ref, onValue, off, update, remove, set, query, orderByChild, limitToLast } from "firebase/database";
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -57,7 +57,9 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const listeners: (() => void)[] = [];
 
-    const reportsListener = onValue(reportsRef, (snapshot) => {
+    // Use a more specific query for reports to avoid permission issues
+    const reportsQuery = query(reportsRef, orderByChild("submissionDate"));
+    const reportsListener = onValue(reportsQuery, (snapshot) => {
         const data = snapshot.val();
         const reportsData: Report[] = [];
         if(data) {
