@@ -1,19 +1,23 @@
 
 {
   "rules": {
-    ".read": "auth != null",
-    ".write": "auth != null",
     "users": {
+      ".read": "auth != null",
+      ".write": "auth != null",
       ".indexOn": "username"
     },
     "reports": {
+      ".read": "auth != null",
+      ".write": "auth != null",
       ".indexOn": ["userId", "submissionDate"]
     },
+    "announcements": {
+      ".read": true,
+      ".write": "auth != null"
+    },
     "config": {
-      "admin_credentials": {
-        ".read": true,
-        ".write": true
-      }
+      ".read": true,
+      ".write": true
     }
   }
 }
