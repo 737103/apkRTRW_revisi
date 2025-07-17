@@ -12,8 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Eye, CheckCircle, Clock, XCircle, Pencil } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { collection, getDocs, query, where, orderBy, DocumentData } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { rtdb } from "@/lib/firebase";
+import { ref, onValue, off, query, orderByChild, equalTo } from "firebase/database";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
@@ -49,50 +49,56 @@ export default function PerformanceDataPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchUserReports = async () => {
+    let listener: any;
+    let reportsQueryRef: any;
+
+    try {
       setIsLoading(true);
-      try {
-        const loggedInUserStr = localStorage.getItem(LOGGED_IN_USER_KEY);
-        if(!loggedInUserStr) {
-            toast({ title: "Sesi tidak ditemukan", description: "Silakan login kembali.", variant: "destructive"});
-            router.push('/');
-            return;
-        };
-        const loggedInUser = JSON.parse(loggedInUserStr);
+      const loggedInUserStr = localStorage.getItem(LOGGED_IN_USER_KEY);
+      if(!loggedInUserStr) {
+          toast({ title: "Sesi tidak ditemukan", description: "Silakan login kembali.", variant: "destructive"});
+          router.push('/');
+          return;
+      };
+      const loggedInUser = JSON.parse(loggedInUserStr);
 
-        if (!loggedInUser.id) {
-           toast({ title: "ID Pengguna tidak ditemukan", description: "Data pengguna tidak lengkap. Silakan login kembali.", variant: "destructive"});
-           router.push('/');
-           return;
-        }
-
-        const reportsCollection = collection(db, "reports");
-        // Temporarily remove orderBy to allow the query to run while the index is building.
-        const q = query(
-            reportsCollection, 
-            where("userId", "==", loggedInUser.id)
-            // orderBy("submissionDate", "desc")
-        );
-        
-        const querySnapshot = await getDocs(q);
-        const userReports = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        })) as Report[];
-
-        setReports(userReports);
-      } catch (error: any) {
-          console.error("Failed to load reports from Firestore", error);
-          if (error.code === 'failed-precondition') {
-             toast({ title: "Indeks sedang dibuat", description: "Database sedang menyiapkan data. Coba lagi dalam beberapa menit.", variant: "destructive"});
-          } else {
-             toast({ title: "Gagal memuat laporan", description: "Terjadi kesalahan saat mengambil data dari server.", variant: "destructive"});
-          }
-      } finally {
-        setIsLoading(false);
+      if (!loggedInUser.id) {
+         toast({ title: "ID Pengguna tidak ditemukan", description: "Data pengguna tidak lengkap. Silakan login kembali.", variant: "destructive"});
+         router.push('/');
+         return;
       }
+
+      const reportsRef = ref(rtdb, "reports");
+      reportsQueryRef = query(reportsRef, orderByChild("userId"), equalTo(loggedInUser.id));
+      
+      listener = onValue(reportsQueryRef, (snapshot) => {
+          const data = snapshot.val();
+          const userReports: Report[] = [];
+          if (data) {
+              Object.keys(data).forEach(key => {
+                  userReports.push({ id: key, ...data[key] });
+              });
+          }
+          // Sort descending by submissionDate
+          setReports(userReports.sort((a, b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()));
+          setIsLoading(false);
+      }, (error) => {
+          console.error("Failed to load reports from RTDB", error);
+          toast({ title: "Gagal memuat laporan", description: "Terjadi kesalahan saat mengambil data dari server.", variant: "destructive"});
+          setIsLoading(false);
+      });
+
+    } catch (error: any) {
+        console.error("Error setting up listener", error);
+        toast({ title: "Gagal memuat data", description: "Terjadi kesalahan pada aplikasi.", variant: "destructive"});
+        setIsLoading(false);
     }
-    fetchUserReports();
+    
+    return () => {
+        if (reportsQueryRef && listener) {
+            off(reportsQueryRef, 'value', listener);
+        }
+    };
   }, [router, toast]);
   
   const handleEditClick = (reportId: string) => {
@@ -104,12 +110,10 @@ export default function PerformanceDataPage() {
   }
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return "Tanggal tidak tersedia";
+    if (!dateString || isNaN(new Date(dateString).getTime())) {
+        return "Tanggal tidak valid";
+    }
     try {
-      // Check if dateString is a valid date representation
-      if (isNaN(new Date(dateString).getTime())) {
-          return "Format tanggal salah";
-      }
       return new Date(dateString).toLocaleDateString('id-ID', {
         year: 'numeric',
         month: 'long',

@@ -16,8 +16,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Camera, MapPin, Activity } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { collection, addDoc, doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { rtdb } from "@/lib/firebase";
+import { ref, get, set, push, update } from "firebase/database";
 
 const LOGGED_IN_USER_KEY = 'rt-rw-logged-in-user';
 
@@ -88,11 +88,11 @@ export default function ReportFormContent() {
             if(editId) {
                 setIsEditMode(true);
                 try {
-                    const reportDocRef = doc(db, "reports", editId);
-                    const reportSnap = await getDoc(reportDocRef);
+                    const reportRef = ref(rtdb, `reports/${editId}`);
+                    const snapshot = await get(reportRef);
 
-                    if (reportSnap.exists()) {
-                        const reportToEdit = reportSnap.data();
+                    if (snapshot.exists()) {
+                        const reportToEdit = snapshot.val();
                         form.reset(reportToEdit);
                         if (reportToEdit.fotoKegiatan) {
                             setPreview(reportToEdit.fotoKegiatan);
@@ -234,9 +234,10 @@ export default function ReportFormContent() {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
             if (isEditMode && values.id) {
-                 const reportDocRef = doc(db, "reports", values.id);
-                 const { id, jamDatang, jamPulang, submissionDate, ...updateData } = values;
-                 await updateDoc(reportDocRef, { ...updateData, status: 'Tertunda' });
+                 const reportRef = ref(rtdb, `reports/${values.id}`);
+                 const { id, jamDatang, jamPulang, submissionDate, ...formData } = values;
+                 const updates = { ...formData, status: 'Tertunda' };
+                 await update(reportRef, updates);
                  
                  toast({
                     title: "Laporan Berhasil Diperbarui!",
@@ -248,14 +249,15 @@ export default function ReportFormContent() {
                 const minutes = String(now.getMinutes()).padStart(2, '0');
                 const departureTime = `${hours}:${minutes}`;
 
+                const newReportRef = push(ref(rtdb, 'reports'));
                 const newReport = {
                     ...values,
+                    id: newReportRef.key,
                     jamPulang: departureTime,
                     submissionDate: new Date().toISOString(),
                     status: 'Tertunda' as const,
                 };
-                delete newReport.id; // Ensure id is not sent for new docs
-                await addDoc(collection(db, "reports"), newReport);
+                await set(newReportRef, newReport);
                 toast({
                     title: "Laporan Berhasil Dikirim!",
                     description: "Laporan kinerja Anda telah dikirim untuk ditinjau.",
@@ -266,7 +268,7 @@ export default function ReportFormContent() {
             setPreview(null);
             router.push('/dashboards/dashboard/performance-data');
         } catch(error) {
-             console.error("Failed to save report to Firestore", error);
+             console.error("Failed to save report to RTDB", error);
              toast({
                 title: "Gagal Menyimpan Laporan",
                 description: "Terjadi kesalahan saat menyimpan laporan Anda.",

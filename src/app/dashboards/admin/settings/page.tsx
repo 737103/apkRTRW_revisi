@@ -6,8 +6,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { KeyRound, User, Save } from "lucide-react";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { rtdb } from "@/lib/firebase";
+import { ref, get, set, update } from "firebase/database";
+
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,14 +45,14 @@ export default function AdminSettingsPage() {
     },
   });
 
-  const adminCredsDocRef = doc(db, "config", "admin_credentials");
+  const adminCredsRef = ref(rtdb, "config/admin_credentials");
 
   useEffect(() => {
     const loadAdminCreds = async () => {
         try {
-            const docSnap = await getDoc(adminCredsDocRef);
-            if (docSnap.exists()) {
-                const creds = docSnap.data();
+            const snapshot = await get(adminCredsRef);
+            if (snapshot.exists()) {
+                const creds = snapshot.val();
                 form.reset({ username: creds.username, password: '', confirmPassword: '' });
             }
         } catch (error) {
@@ -76,7 +77,7 @@ export default function AdminSettingsPage() {
            dataToUpdate.password = values.password;
        }
 
-       await updateDoc(adminCredsDocRef, dataToUpdate);
+       await update(adminCredsRef, dataToUpdate);
 
        toast({
            title: "Pengaturan Disimpan",

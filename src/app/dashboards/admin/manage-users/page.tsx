@@ -6,8 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { PlusCircle, Trash2, UserPlus, Users, Pencil } from "lucide-react";
-import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { rtdb } from "@/lib/firebase";
+import { ref, onValue, off, push, set, remove } from "firebase/database";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,32 +41,34 @@ export default function ManageUsersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const usersCollection = collection(db, "users");
-
-  const fetchUsers = async () => {
-    setIsLoading(true);
-    try {
-      const querySnapshot = await getDocs(query(usersCollection));
-      const usersData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as User[];
-      setUsers(usersData);
-    } catch (error) {
-      console.error("Failed to load users from Firestore", error);
-      toast({
-        title: "Gagal Memuat Data",
-        description: "Tidak dapat memuat daftar pengguna.",
-        variant: "destructive",
-      });
-    } finally {
-        setIsLoading(false);
-    }
-  };
+  const usersRef = ref(rtdb, "users");
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    setIsLoading(true);
+    const listener = onValue(usersRef, (snapshot) => {
+        const data = snapshot.val();
+        const usersData: User[] = [];
+        if (data) {
+            for (const key in data) {
+                usersData.push({ id: key, ...data[key] });
+            }
+        }
+        setUsers(usersData);
+        setIsLoading(false);
+    }, (error) => {
+        console.error("Failed to load users from RTDB", error);
+        toast({
+            title: "Gagal Memuat Data",
+            description: "Tidak dapat memuat daftar pengguna.",
+            variant: "destructive",
+        });
+        setIsLoading(false);
+    });
+
+    return () => {
+        off(usersRef, 'value', listener);
+    };
+  }, [toast]);
 
   const form = useForm<z.infer<typeof userSchema>>({
     resolver: zodResolver(userSchema),
@@ -110,7 +112,7 @@ export default function ManageUsersPage() {
   const onSubmit = async (values: z.infer<typeof userSchema>) => {
     try {
       if (editingUser) {
-        const userDoc = doc(db, "users", editingUser.id);
+        const userToUpdateRef = ref(rtdb, `users/${editingUser.id}`);
         const { password, ...updateData } = values;
         
         const dataToUpdate: any = { ...updateData };
@@ -118,7 +120,7 @@ export default function ManageUsersPage() {
             dataToUpdate.password = password;
         }
 
-        await updateDoc(userDoc, dataToUpdate);
+        await set(userToUpdateRef, dataToUpdate);
         toast({
           title: "Pengguna Diperbarui",
           description: `Data untuk "${values.fullName}" berhasil diperbarui.`,
@@ -128,15 +130,14 @@ export default function ManageUsersPage() {
           form.setError("password", { type: "manual", message: "Password harus diisi untuk pengguna baru." });
           return;
         }
-        const docRef = await addDoc(usersCollection, values);
-        await updateDoc(docRef, { id: docRef.id });
+        const newUserRef = push(usersRef);
+        await set(newUserRef, { ...values, id: newUserRef.key });
 
         toast({
             title: "Pengguna Ditambahkan",
             description: `Pengguna "${values.fullName}" berhasil dibuat.`,
         });
       }
-      fetchUsers();
       handleDialogOpenChange(false);
     } catch (error) {
       console.error("Failed to save user", error);
@@ -150,14 +151,13 @@ export default function ManageUsersPage() {
 
   const deleteUser = async (userId: string) => {
      try {
-        const userDoc = doc(db, "users", userId);
-        await deleteDoc(userDoc);
+        const userToDeleteRef = ref(rtdb, `users/${userId}`);
+        await remove(userToDeleteRef);
         toast({
             title: "Pengguna Dihapus",
             description: "Pengguna telah berhasil dihapus.",
             variant: "default",
         });
-        fetchUsers();
     } catch (error) {
         console.error("Failed to delete user", error);
         toast({

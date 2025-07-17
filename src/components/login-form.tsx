@@ -4,8 +4,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Building, LogIn, Shield, User } from 'lucide-react';
-import { collection, getDocs, query, where, doc, getDoc, setDoc, addDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { rtdb } from "@/lib/firebase";
+import { ref, get, set, query, orderByChild, equalTo } from "firebase/database";
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,22 +30,22 @@ export function LoginForm() {
   const [userPassword, setUserPassword] = useState('');
 
   useEffect(() => {
-    // This function seeds the database with initial data if it's empty
     const seedInitialData = async () => {
         try {
             // Seed Admin Credentials
-            const adminCredsDocRef = doc(db, "config", "admin_credentials");
-            const adminSnap = await getDoc(adminCredsDocRef);
+            const adminCredsRef = ref(rtdb, "config/admin_credentials");
+            const adminSnap = await get(adminCredsRef);
             if (!adminSnap.exists()) {
-                await setDoc(adminCredsDocRef, { username: 'admin', password: '123' });
+                await set(adminCredsRef, { username: 'admin', password: '123' });
             }
 
             // Seed Demo User
-            const usersCollection = collection(db, "users");
-            const userQuery = query(usersCollection, where("username", "==", "user"));
-            const userSnap = await getDocs(userQuery);
-            if (userSnap.empty) {
+            const usersRef = ref(rtdb, "users");
+            const userQuery = query(usersRef, orderByChild("username"), equalTo("user"));
+            const userSnap = await get(userQuery);
+            if (!userSnap.exists()) {
                 const demoUser = {
+                    id: 'user-demo-id', // Assign a stable ID
                     username: 'user',
                     password: '123',
                     fullName: 'Budi Santoso',
@@ -53,14 +53,13 @@ export function LoginForm() {
                     rt: '001',
                     rw: '005'
                 };
-                // Firestore will auto-generate an ID
-                await addDoc(usersCollection, demoUser);
+                await set(ref(rtdb, `users/${demoUser.id}`), demoUser);
             }
         } catch (error) {
             console.error("Failed to seed initial data:", error);
             toast({
                 title: "Inisialisasi Gagal",
-                description: "Gagal menyiapkan data awal aplikasi. Periksa koneksi dan aturan Firestore.",
+                description: "Gagal menyiapkan data awal aplikasi. Periksa koneksi dan aturan database.",
                 variant: "destructive",
             });
         }
@@ -72,9 +71,9 @@ export function LoginForm() {
     e.preventDefault();
     try {
         if (role === 'admin') {
-            const adminCredsDoc = doc(db, "config", "admin_credentials");
-            const adminSnap = await getDoc(adminCredsDoc);
-            const creds = adminSnap.data();
+            const adminCredsRef = ref(rtdb, "config/admin_credentials");
+            const adminSnap = await get(adminCredsRef);
+            const creds = adminSnap.val();
             if (creds && adminUsername === creds.username && adminPassword === creds.password) {
                 localStorage.removeItem(LOGGED_IN_USER_KEY);
                 localStorage.setItem('rt-rw-role', 'admin');
@@ -87,24 +86,34 @@ export function LoginForm() {
                 })
             }
         } else {
-            const usersCollection = collection(db, "users");
-            const q = query(
-                usersCollection, 
-                where("username", "==", userUsername), 
-                where("password", "==", userPassword)
-            );
-            const querySnapshot = await getDocs(q);
+            const usersRef = ref(rtdb, "users");
+            const q = query(usersRef, orderByChild("username"), equalTo(userUsername));
+            const snapshot = await get(q);
 
-            if (!querySnapshot.empty) {
-                const userDoc = querySnapshot.docs[0];
-                const foundUser = { id: userDoc.id, ...userDoc.data() };
-                localStorage.setItem(LOGGED_IN_USER_KEY, JSON.stringify(foundUser));
-                localStorage.setItem('rt-rw-role', 'user');
-                router.push('/dashboards/dashboard');
+            if (snapshot.exists()) {
+                let userFound = false;
+                snapshot.forEach((childSnapshot) => {
+                    const user = childSnapshot.val();
+                    if(user.password === userPassword){
+                        const foundUser = { id: childSnapshot.key, ...user };
+                        localStorage.setItem(LOGGED_IN_USER_KEY, JSON.stringify(foundUser));
+                        localStorage.setItem('rt-rw-role', 'user');
+                        router.push('/dashboards/dashboard');
+                        userFound = true;
+                    }
+                });
+
+                if(!userFound){
+                    toast({
+                        title: "Login Gagal",
+                        description: "Password pengguna salah.",
+                        variant: "destructive",
+                    });
+                }
             } else {
                 toast({
                     title: "Login Gagal",
-                    description: "Username atau password pengguna salah.",
+                    description: "Username pengguna tidak ditemukan.",
                     variant: "destructive",
                 });
             }

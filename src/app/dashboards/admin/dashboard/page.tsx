@@ -4,8 +4,8 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { collection, getDocs, doc, updateDoc, deleteDoc, query, orderBy, where } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { rtdb } from "@/lib/firebase";
+import { ref, onValue, off, update, remove, set } from "firebase/database";
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -49,43 +49,42 @@ export default function AdminDashboardPage() {
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [noteContent, setNoteContent] = useState("");
   const { toast } = useToast();
-
-  const reportsCollection = collection(db, "reports");
-  const usersCollection = collection(db, "users");
-  const announcementsCollection = collection(db, "announcements");
-
-  const fetchDashboardData = async () => {
-    try {
-      const reportsQuery = query(reportsCollection, orderBy("submissionDate", "desc"));
-      const [reportsSnapshot, usersSnapshot, announcementsSnapshot] = await Promise.all([
-        getDocs(reportsQuery),
-        getDocs(usersCollection),
-        getDocs(announcementsCollection),
-      ]);
-      
-      const reportsData = reportsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Report[];
-      setReports(reportsData);
-      setUserCount(usersSnapshot.size);
-      setAnnouncementCount(announcementsSnapshot.size);
-
-    } catch (error) {
-      console.error("Failed to load dashboard data from Firestore", error);
-       toast({
-        title: "Gagal Memuat Data Dasbor",
-        description: "Terjadi kesalahan saat memuat data dari server.",
-        variant: "destructive",
-      });
-    }
-  };
+  
+  const reportsRef = ref(rtdb, "reports");
+  const usersRef = ref(rtdb, "users");
+  const announcementsRef = ref(rtdb, "announcements");
 
   useEffect(() => {
-    fetchDashboardData();
+    const listeners: (() => void)[] = [];
+
+    const reportsListener = onValue(reportsRef, (snapshot) => {
+        const data = snapshot.val();
+        const reportsData: Report[] = [];
+        if(data) {
+            Object.keys(data).forEach(key => reportsData.push({ id: key, ...data[key] }));
+        }
+        setReports(reportsData.sort((a,b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()));
+    }, (error) => console.error("Failed to load reports:", error));
+    listeners.push(() => off(reportsRef, 'value', reportsListener));
+
+    const usersListener = onValue(usersRef, (snapshot) => {
+        setUserCount(snapshot.size);
+    }, (error) => console.error("Failed to load users:", error));
+    listeners.push(() => off(usersRef, 'value', usersListener));
+
+    const announcementsListener = onValue(announcementsRef, (snapshot) => {
+        setAnnouncementCount(snapshot.size);
+    }, (error) => console.error("Failed to load announcements:", error));
+    listeners.push(() => off(announcementsRef, 'value', announcementsListener));
+
+    return () => {
+        listeners.forEach(unsub => unsub());
+    }
   }, []);
   
   const handleNoteDialogClose = () => {
     setIsNoteDialogOpen(false);
     setNoteContent("");
-    // We don't reset selectedReport here so that the main dialog remains open
   };
   
   const handleDetailDialogChange = (isOpen: boolean) => {
@@ -95,16 +94,11 @@ export default function AdminDashboardPage() {
     setIsDetailDialogOpen(isOpen);
   };
 
-
   const updateReportStatus = async (reportId: string, status: ReportStatus) => {
     try {
-        const reportDoc = doc(db, "reports", reportId);
-        await updateDoc(reportDoc, { status });
-        
-        // Refresh local state
-        await fetchDashboardData();
+        const reportRef = ref(rtdb, `reports/${reportId}`);
+        await update(reportRef, { status });
         setSelectedReport(prev => prev ? {...prev, status: status} : null);
-
         toast({
             title: "Status Laporan Diperbarui",
             description: `Laporan telah ditandai sebagai ${status}.`,
@@ -113,7 +107,6 @@ export default function AdminDashboardPage() {
         console.error("Failed to update report status", error);
         toast({
             title: "Gagal Memperbarui Status",
-            description: "Terjadi kesalahan saat memperbarui status laporan.",
             variant: "destructive",
         });
     }
@@ -121,25 +114,18 @@ export default function AdminDashboardPage() {
   
   const handleSaveNote = async () => {
     if (!selectedReport) return;
-    
     try {
-        const reportDoc = doc(db, "reports", selectedReport.id);
-        await updateDoc(reportDoc, { notes: noteContent });
-            
-        // Refresh local state
-        await fetchDashboardData();
+        const reportRef = ref(rtdb, `reports/${selectedReport.id}`);
+        await update(reportRef, { notes: noteContent });
         setSelectedReport(prev => prev ? {...prev, notes: noteContent} : null);
-
         toast({
             title: "Catatan Disimpan",
-            description: "Catatan untuk laporan telah berhasil disimpan.",
         });
         handleNoteDialogClose();
     } catch(error) {
         console.error("Failed to save note", error);
         toast({
             title: "Gagal Menyimpan Catatan",
-            description: "Terjadi kesalahan saat menyimpan catatan.",
             variant: "destructive",
         });
     }
@@ -153,21 +139,15 @@ export default function AdminDashboardPage() {
   
   const deleteReport = async (reportId: string) => {
      try {
-        const reportDoc = doc(db, "reports", reportId);
-        await deleteDoc(reportDoc);
-        
-        await fetchDashboardData();
-
+        const reportRef = ref(rtdb, `reports/${reportId}`);
+        await remove(reportRef);
         toast({
             title: "Laporan Dihapus",
-            description: "Laporan telah berhasil dihapus secara permanen.",
-            variant: "default",
         });
     } catch (error) {
         console.error("Failed to delete report", error);
         toast({
-            title: "Gagal Menghapus",
-            description: "Terjadi kesalahan saat menghapus laporan.",
+            title: "Gagal Menghapus Laporan",
             variant: "destructive",
         });
     }
@@ -248,7 +228,7 @@ export default function AdminDashboardPage() {
                   <TableCell className="font-medium">{report.namaLengkap}</TableCell>
                   <TableCell>{report.jabatan}</TableCell>
                   <TableCell>{`RT ${report.rt} / RW ${report.rw}`}</TableCell>
-                  <TableCell>{report.submissionDate}</TableCell>
+                  <TableCell>{new Date(report.submissionDate).toLocaleDateString('id-ID')}</TableCell>
                   <TableCell>
                     <Badge variant={report.status === 'Tertunda' ? 'outline' : report.status === 'Disetujui' ? 'default' : 'destructive'} className={cn(
                         report.status === 'Tertunda' ? 'border-yellow-500/50 text-yellow-600' : 
@@ -320,7 +300,7 @@ export default function AdminDashboardPage() {
                 <DialogHeader>
                   <DialogTitle>Detail Laporan - {selectedReport.namaLengkap}</DialogTitle>
                   <DialogDescription>
-                    Dikirim pada {selectedReport.submissionDate} - RT {selectedReport.rt}/RW {selectedReport.rw}
+                    Dikirim pada {new Date(selectedReport.submissionDate).toLocaleString('id-ID')} - RT {selectedReport.rt}/RW {selectedReport.rw}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
