@@ -90,7 +90,7 @@ export default function AdminDashboardPage() {
     return () => {
         listeners.forEach(unsub => unsub());
     }
-  }, []);
+  }, [toast]);
   
   const handleNoteDialogClose = () => {
     setIsNoteDialogOpen(false);
@@ -444,5 +444,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-    
