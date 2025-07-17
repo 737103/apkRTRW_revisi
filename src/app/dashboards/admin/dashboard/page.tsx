@@ -57,7 +57,7 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const listeners: (() => void)[] = [];
 
-    // Fetch the last 50 reports to avoid large data scans and permission issues.
+    // Fetch the last 50 reports ordered by submission date. This requires an index in RTDB rules.
     const reportsQuery = query(reportsRef, orderByChild("submissionDate"), limitToLast(50));
     const reportsListener = onValue(reportsQuery, (snapshot) => {
         const data = snapshot.val();
@@ -65,13 +65,13 @@ export default function AdminDashboardPage() {
         if(data) {
             Object.keys(data).forEach(key => reportsData.push({ id: key, ...data[key] }));
         }
-        // Sort on the client-side by date, most recent first.
+        // Sort on the client-side to ensure descending order, as RTDB returns ascending.
         setReports(reportsData.sort((a,b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()));
     }, (error) => {
       console.error("Failed to load reports:", error);
       toast({
         title: "Gagal Memuat Laporan",
-        description: error.message,
+        description: "Pastikan aturan database sudah di-deploy: firebase deploy --only database",
         variant: "destructive",
       });
     });
@@ -444,5 +444,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-    
