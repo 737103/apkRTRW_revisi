@@ -21,7 +21,8 @@ const firebaseConfig = {
   storageBucket: "aplikasirtrw-nuwr3.firebasestorage.app",
   messagingSenderId: "64245177816",
   appId: "1:64245177816:web:724c026756f4b2c6a0e6ad",
-  measurementId: "YOUR_MEASUREMENT_ID"
+  measurementId: "YOUR_MEASUREMENT_ID",
+  databaseURL: "https://aplikasirtrw-nuwr3-default-rtdb.firebaseio.com"
 };
 
 // Initialize Firebase

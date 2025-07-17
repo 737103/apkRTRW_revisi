@@ -57,15 +57,10 @@ export function LoginForm() {
             }
         } catch (error) {
             console.error("Failed to seed initial data:", error);
-            toast({
-                title: "Inisialisasi Gagal",
-                description: "Gagal menyiapkan data awal aplikasi. Periksa koneksi dan aturan database.",
-                variant: "destructive",
-            });
         }
     };
     seedInitialData();
-  }, [toast]);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
