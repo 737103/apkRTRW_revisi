@@ -58,7 +58,7 @@ export default function AdminDashboardPage() {
     const listeners: (() => void)[] = [];
 
     // Use a more specific query for reports to avoid permission issues
-    const reportsQuery = query(reportsRef, orderByChild("submissionDate"));
+    const reportsQuery = ref(rtdb, 'reports');
     const reportsListener = onValue(reportsQuery, (snapshot) => {
         const data = snapshot.val();
         const reportsData: Report[] = [];
@@ -435,4 +435,5 @@ export default function AdminDashboardPage() {
       </Dialog>
     </div>
   );
-}
+
+    
