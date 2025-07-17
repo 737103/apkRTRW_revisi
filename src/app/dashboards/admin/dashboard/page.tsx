@@ -285,11 +285,11 @@ export default function AdminDashboardPage() {
                                       <Trash2 className="h-4 w-4" />
                                       <span className="sr-only">Hapus</span>
                                   </Button>
-                              AlertDialogTrigger>
+                              </AlertDialogTrigger>
                           </TooltipTrigger>
                            <TooltipContent>
                               <p>Hapus Laporan</p>
-                           TooltipContent>
+                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                       <AlertDialogContent>
