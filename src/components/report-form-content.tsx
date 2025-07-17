@@ -254,6 +254,7 @@ export default function ReportFormContent() {
                     submissionDate: new Date().toISOString(),
                     status: 'Tertunda' as const,
                 };
+                delete newReport.id; // Ensure id is not sent for new docs
                 await addDoc(collection(db, "reports"), newReport);
                 toast({
                     title: "Laporan Berhasil Dikirim!",
