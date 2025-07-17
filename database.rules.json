@@ -3,7 +3,10 @@
   "rules": {
     "users": {
       ".read": "auth != null",
-      ".write": "auth != null",
+      ".write": true,
+      "$uid": {
+        ".write": "auth != null && auth.uid == $uid"
+      },
       ".indexOn": "username"
     },
     "reports": {
@@ -17,9 +20,7 @@
     },
     "config": {
       ".read": "auth != null",
-      ".write": "auth != null"
+      ".write": true
     }
   }
 }
-
-    
