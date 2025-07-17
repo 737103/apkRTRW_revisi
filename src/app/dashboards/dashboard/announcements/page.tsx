@@ -1,85 +1,76 @@
-
 'use client';
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Megaphone } from "lucide-react";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from 'react';
+import { rtdb } from '@/lib/firebase';
+import { ref, onValue, off } from 'firebase/database';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 interface Announcement {
   id: string;
   title: string;
   content: string;
-  date: string;
-  createdAt: any;
+  timestamp: number;
 }
 
 export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAnnouncements = async () => {
-        setIsLoading(true);
-        try {
-            const announcementsCollection = collection(db, "announcements");
-            const q = query(announcementsCollection, orderBy("createdAt", "desc"));
-            const querySnapshot = await getDocs(q);
-            const announcementsData = querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            })) as Announcement[];
-            setAnnouncements(announcementsData);
-        } catch (error) {
-            console.error("Failed to load announcements from Firestore", error);
-        } finally {
-            setIsLoading(false);
-        }
+    const announcementsRef = ref(rtdb, 'announcements');
+
+    const unsubscribe = onValue(announcementsRef, (snapshot) => {
+      const data = snapshot.val();
+      const loadedAnnouncements: Announcement[] = [];
+      if (data) {
+        Object.keys(data).forEach((key) => {
+          loadedAnnouncements.push({
+            id: key,
+            ...data[key],
+          });
+        });
+      }
+      // Sort by timestamp in descending order (latest first)
+      setAnnouncements(loadedAnnouncements.sort((a, b) => b.timestamp - a.timestamp));
+      setLoading(false);
+    }, (error) => {
+      console.error('Error fetching announcements:', error);
+      setLoading(false);
+    });
+
+    // Cleanup function to detach the listener when the component unmounts
+    return () => {
+      off(announcementsRef, 'value', unsubscribe);
     };
-    fetchAnnouncements();
   }, []);
 
+  if (loading) {
+    return <div className="container mx-auto p-4">Loading announcements...</div>;
+  }
+
   return (
-    <div className="space-y-6 animate-in fade-in-50">
-        <div>
-            <h1 className="text-4xl font-bold tracking-tight">Semua Pengumuman</h1>
-            <p className="text-lg text-muted-foreground">Informasi penting dan terbaru dari pengurus untuk Anda.</p>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Announcements</h1>
+      {announcements.length === 0 ? (
+        <p>No announcements available yet.</p>
+      ) : (
+        <div className="space-y-4">
+          {announcements.map((announcement) => (
+            <Card key={announcement.id}>
+              <CardHeader>
+                <CardTitle>{announcement.title}</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {new Date(announcement.timestamp).toLocaleString()}
+                </p>
+              </CardHeader>
+              <CardContent>
+                <p>{announcement.content}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-        
-        {isLoading ? (
-            <div className="space-y-4">
-                <Skeleton className="h-32 w-full" />
-                <Skeleton className="h-32 w-full" />
-                <Skeleton className="h-32 w-full" />
-            </div>
-        ) : announcements.length > 0 ? (
-            <div className="space-y-4">
-                {announcements.map((ann) => (
-                    <Card key={ann.id} className="shadow-md hover:shadow-lg transition-shadow">
-                        <CardHeader>
-                            <CardTitle className="flex items-start gap-3">
-                                <Megaphone className="h-6 w-6 text-accent mt-1 flex-shrink-0"/>
-                                <div>
-                                  <span>{ann.title}</span>
-                                  <CardDescription className="mt-1">{ann.date || 'Tanggal tidak tersedia'}</CardDescription>
-                                </div>
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-foreground whitespace-pre-wrap">{ann.content}</p>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-        ) : (
-             <div className="text-center py-20 text-muted-foreground bg-card rounded-lg shadow-md">
-                <Megaphone className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                <p className="mt-4">Belum ada pengumuman saat ini.</p>
-                <p className="text-sm">Silakan periksa kembali nanti.</p>
-            </div>
-        )}
+      )}
     </div>
   );
 }

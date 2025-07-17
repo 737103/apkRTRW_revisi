@@ -1,10 +1,9 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, Users, Megaphone, Settings, Building, LogOut, FileText, User } from 'lucide-react';
+import { Home, Users, Megaphone, Settings, Building, LogOut, FileText, User, PlusCircle } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -53,12 +52,14 @@ export function DashboardSidebar() {
   const adminLinks = [
     { href: '/dashboards/admin/manage-users', label: 'Kelola Pengguna', icon: Users },
     { href: '/dashboards/admin/announcements', label: 'Kelola Pengumuman', icon: Megaphone },
+    { href: '/dashboards/admin/add-announcement', label: 'Tambah Pengumuman', icon: PlusCircle },
     { href: '/dashboards/admin/settings', label: 'Pengaturan', icon: Settings },
   ];
 
   const userLinks = [
     { href: '/dashboards/dashboard/submit-report', label: 'Kirim Laporan', icon: FileText },
     { href: '/dashboards/dashboard/performance-data', label: 'Data Kinerja', icon: FileText },
+    { href: '/dashboards/dashboard/announcements', label: 'Pengumuman', icon: Megaphone },
   ];
   
   const baseDashboardLink = { href: isAdmin ? '/dashboards/admin/dashboard' : '/dashboards/dashboard', label: 'Dasbor', icon: Home };

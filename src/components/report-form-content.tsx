@@ -220,7 +220,7 @@ export default function ReportFormContent() {
                     const ctx = canvas.getContext("2d");
                     ctx?.drawImage(img, 0, 0, width, height);
                     
-                    const dataUrl = canvas.toDataURL("image/jpeg", 0.7); // Compress to 70% quality JPEG
+                    const dataUrl = canvas.toDataURL("image/jpeg", 0.5); // Compress to 50% quality JPEG
                     setPreview(dataUrl);
                     form.setValue("fotoKegiatan", dataUrl);
                     form.trigger("fotoKegiatan"); // Trigger validation

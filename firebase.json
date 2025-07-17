@@ -15,6 +15,9 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
+  "database": {
+    "rules": "database.rules.json"
+  },
   "emulators": {
     "firestore": {
       "port": 8080,
@@ -22,6 +25,10 @@
     },
     "auth": {
       "port": 9099,
+      "host": "127.0.0.1"
+    },
+    "database": {
+      "port": 9000,
       "host": "127.0.0.1"
     }
   }

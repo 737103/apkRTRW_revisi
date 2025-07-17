@@ -6,8 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { PlusCircle, Trash2, Megaphone, Pencil } from "lucide-react";
-import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { rtdb } from "@/lib/firebase";
+import { ref, onValue, off, push, update, remove, serverTimestamp } from "firebase/database";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,11 +23,15 @@ const announcementSchema = z.object({
   id: z.string().optional(),
   title: z.string().min(5, { message: "Judul harus diisi (minimal 5 karakter)." }),
   content: z.string().min(10, { message: "Konten pengumuman harus diisi (minimal 10 karakter)." }),
-  date: z.string().optional(),
-  createdAt: z.any().optional(),
+  timestamp: z.number().optional(),
 });
 
-type Announcement = z.infer<typeof announcementSchema> & { id: string, date: string, createdAt: any };
+type Announcement = {
+  id: string;
+  title: string;
+  content: string;
+  timestamp: number;
+};
 
 export default function ManageAnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -36,33 +40,35 @@ export default function ManageAnnouncementsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   
-  const announcementsCollection = collection(db, "announcements");
-
-  const fetchAnnouncements = async () => {
-    setIsLoading(true);
-    try {
-      const q = query(announcementsCollection, orderBy("createdAt", "desc"));
-      const querySnapshot = await getDocs(q);
-      const announcementsData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Announcement[];
-      setAnnouncements(announcementsData);
-    } catch (error) {
-      console.error("Failed to load announcements from Firestore", error);
-      toast({
-        title: "Gagal Memuat Data",
-        description: "Tidak dapat memuat daftar pengumuman.",
-        variant: "destructive",
-      });
-    } finally {
-        setIsLoading(false);
-    }
-  };
+  const announcementsRef = ref(rtdb, "announcements");
 
   useEffect(() => {
-    fetchAnnouncements();
-  }, []);
+    setIsLoading(true);
+    const listener = onValue(announcementsRef, (snapshot) => {
+        const data = snapshot.val();
+        const announcementsData: Announcement[] = [];
+        if (data) {
+            for (const key in data) {
+                announcementsData.push({ id: key, ...data[key] });
+            }
+        }
+        // Sort descending by timestamp
+        setAnnouncements(announcementsData.sort((a, b) => b.timestamp - a.timestamp));
+        setIsLoading(false);
+    }, (error) => {
+        console.error("Failed to load announcements from RTDB", error);
+        toast({
+            title: "Gagal Memuat Data",
+            description: "Tidak dapat memuat daftar pengumuman.",
+            variant: "destructive",
+        });
+        setIsLoading(false);
+    });
+
+    return () => {
+        off(announcementsRef, 'value', listener);
+    };
+  }, [toast]);
 
   const form = useForm<z.infer<typeof announcementSchema>>({
     resolver: zodResolver(announcementSchema),
@@ -95,8 +101,8 @@ export default function ManageAnnouncementsPage() {
   const onSubmit = async (values: z.infer<typeof announcementSchema>) => {
     try {
       if (editingAnnouncement) {
-        const announcementDoc = doc(db, "announcements", editingAnnouncement.id);
-        await updateDoc(announcementDoc, {
+        const announcementToUpdateRef = ref(rtdb, `announcements/${editingAnnouncement.id}`);
+        await update(announcementToUpdateRef, {
             title: values.title,
             content: values.content
         });
@@ -105,18 +111,16 @@ export default function ManageAnnouncementsPage() {
           description: `Pengumuman "${values.title}" berhasil diperbarui.`,
         });
       } else {
-        const announcementDate = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
-        await addDoc(announcementsCollection, {
-            ...values,
-            date: announcementDate,
-            createdAt: new Date(),
+        await push(announcementsRef, {
+            title: values.title,
+            content: values.content,
+            timestamp: serverTimestamp(),
         });
         toast({
             title: "Pengumuman Diterbitkan",
             description: `Pengumuman "${values.title}" berhasil diterbitkan.`,
         });
       }
-      fetchAnnouncements();
       handleDialogOpenChange(false);
     } catch (error) {
       console.error("Failed to save announcement", error);
@@ -130,14 +134,13 @@ export default function ManageAnnouncementsPage() {
 
   const deleteAnnouncement = async (announcementId: string) => {
      try {
-        const announcementDoc = doc(db, "announcements", announcementId);
-        await deleteDoc(announcementDoc);
+        const announcementToDeleteRef = ref(rtdb, `announcements/${announcementId}`);
+        await remove(announcementToDeleteRef);
         toast({
             title: "Pengumuman Dihapus",
             description: "Pengumuman telah berhasil dihapus.",
             variant: "default",
         });
-        fetchAnnouncements();
     } catch (error) {
         console.error("Failed to delete announcement", error);
         toast({
@@ -147,6 +150,16 @@ export default function ManageAnnouncementsPage() {
         });
     }
   }
+  
+  const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString('id-ID', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in-50">
@@ -255,7 +268,7 @@ export default function ManageAnnouncementsPage() {
                                     </AlertDialog>
                                 </div>
                             </CardTitle>
-                            <CardDescription>{ann.date || 'Tanggal tidak tersedia'}</CardDescription>
+                            <CardDescription>{ann.timestamp ? formatDate(ann.timestamp) : 'Tanggal tidak tersedia'}</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <p className="text-sm text-foreground whitespace-pre-wrap">{ann.content}</p>
