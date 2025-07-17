@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Eye, CheckCircle, Clock, XCircle, Pencil } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, where, orderBy, DocumentData } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +23,7 @@ type ReportStatus = 'Tertunda' | 'Disetujui' | 'Ditolak';
 
 interface Report {
   id: string;
+  userId: string;
   namaLengkap: string;
   rt: string;
   rw: string;
@@ -59,6 +60,12 @@ export default function PerformanceDataPage() {
         };
         const loggedInUser = JSON.parse(loggedInUserStr);
 
+        if (!loggedInUser.id) {
+           toast({ title: "ID Pengguna tidak ditemukan", description: "Data pengguna tidak lengkap. Silakan login kembali.", variant: "destructive"});
+           router.push('/');
+           return;
+        }
+
         const reportsCollection = collection(db, "reports");
         const q = query(
             reportsCollection, 
@@ -67,10 +74,28 @@ export default function PerformanceDataPage() {
         );
         
         const querySnapshot = await getDocs(q);
-        const userReports = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Report[];
+        const userReports: Report[] = querySnapshot.docs.map(doc => {
+          const data = doc.data() as DocumentData;
+          return {
+            id: doc.id,
+            userId: data.userId,
+            namaLengkap: data.namaLengkap,
+            rt: data.rt,
+            rw: data.rw,
+            jabatan: data.jabatan,
+            jamDatang: data.jamDatang,
+            jamPulang: data.jamPulang,
+            jenisKegiatan: data.jenisKegiatan,
+            deskripsiLainnya: data.deskripsiLainnya,
+            deskripsiKegiatan: data.deskripsiKegiatan,
+            alamatKegiatan: data.alamatKegiatan,
+            lokasiKegiatan: data.lokasiKegiatan,
+            fotoKegiatan: data.fotoKegiatan,
+            submissionDate: data.submissionDate,
+            status: data.status,
+            notes: data.notes
+          };
+        });
         setReports(userReports);
       } catch (error) {
           console.error("Failed to parse reports from Firestore", error);
@@ -126,7 +151,7 @@ export default function PerformanceDataPage() {
               {reports.map((report) => (
                 <TableRow key={report.id} className="hover:bg-muted/50">
                   <TableCell className="font-medium capitalize">{report.jenisKegiatan}{report.jenisKegiatan === 'lainnya' && report.deskripsiLainnya ? `: ${report.deskripsiLainnya}` : ''}</TableCell>
-                  <TableCell>{report.submissionDate}</TableCell>
+                  <TableCell>{new Date(report.submissionDate).toLocaleDateString('id-ID')}</TableCell>
                   <TableCell>
                     <Badge variant={report.status === 'Tertunda' ? 'outline' : report.status === 'Disetujui' ? 'default' : 'destructive'} className={cn(
                         report.status === 'Tertunda' ? 'border-yellow-500/50 text-yellow-600' : 
@@ -176,7 +201,7 @@ export default function PerformanceDataPage() {
                           <DialogHeader>
                             <DialogTitle>Detail Laporan</DialogTitle>
                             <DialogDescription>
-                              Dikirim pada {selectedReport.submissionDate}
+                              Dikirim pada {new Date(selectedReport.submissionDate).toLocaleString('id-ID')}
                             </DialogDescription>
                           </DialogHeader>
                           <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">

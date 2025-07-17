@@ -28,29 +28,24 @@ export function LoginForm() {
   // User states
   const [userUsername, setUserUsername] = useState('');
   const [userPassword, setUserPassword] = useState('');
-  
-  const [adminCreds, setAdminCreds] = useState({ username: 'admin', password: '123456' });
 
   useEffect(() => {
     // This function seeds the database with initial data if it's empty
     const seedInitialData = async () => {
         try {
             // Seed Admin Credentials
-            const adminCredsDoc = doc(db, "config", "admin_credentials");
-            const adminSnap = await getDoc(adminCredsDoc);
+            const adminCredsDocRef = doc(db, "config", "admin_credentials");
+            const adminSnap = await getDoc(adminCredsDocRef);
             if (!adminSnap.exists()) {
-                await setDoc(adminCredsDoc, { username: 'admin', password: '123456' });
-                setAdminCreds({ username: 'admin', password: '123456' });
-            } else {
-                setAdminCreds(adminSnap.data() as any);
+                await setDoc(adminCredsDocRef, { username: 'admin', password: '123456' });
             }
 
             // Seed Demo User
             const usersCollection = collection(db, "users");
-            const usersSnap = await getDocs(query(usersCollection));
-            if (usersSnap.empty) {
+            const userQuery = query(usersCollection, where("username", "==", "user"));
+            const userSnap = await getDocs(userQuery);
+            if (userSnap.empty) {
                 const demoUser = {
-                    id: 'user-01',
                     username: 'user',
                     password: '123',
                     fullName: 'Budi Santoso',
@@ -58,13 +53,14 @@ export function LoginForm() {
                     rt: '001',
                     rw: '005'
                 };
-                await setDoc(doc(usersCollection, demoUser.id), demoUser);
+                // Firestore will auto-generate an ID
+                await addDoc(usersCollection, demoUser);
             }
         } catch (error) {
             console.error("Failed to seed initial data:", error);
             toast({
                 title: "Inisialisasi Gagal",
-                description: "Gagal menyiapkan data awal aplikasi.",
+                description: "Gagal menyiapkan data awal aplikasi. Periksa koneksi dan aturan Firestore.",
                 variant: "destructive",
             });
         }
@@ -100,7 +96,8 @@ export function LoginForm() {
             const querySnapshot = await getDocs(q);
 
             if (!querySnapshot.empty) {
-                const foundUser = { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() };
+                const userDoc = querySnapshot.docs[0];
+                const foundUser = { id: userDoc.id, ...userDoc.data() };
                 localStorage.setItem(LOGGED_IN_USER_KEY, JSON.stringify(foundUser));
                 localStorage.setItem('rt-rw-role', 'user');
                 router.push('/dashboards/dashboard');

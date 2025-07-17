@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { KeyRound, User, Save } from "lucide-react";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 import { Button } from "@/components/ui/button";
@@ -44,15 +44,15 @@ export default function AdminSettingsPage() {
     },
   });
 
-  const adminCredsDoc = doc(db, "config", "admin_credentials");
+  const adminCredsDocRef = doc(db, "config", "admin_credentials");
 
   useEffect(() => {
     const loadAdminCreds = async () => {
         try {
-            const docSnap = await getDoc(adminCredsDoc);
+            const docSnap = await getDoc(adminCredsDocRef);
             if (docSnap.exists()) {
                 const creds = docSnap.data();
-                form.reset({ username: creds.username });
+                form.reset({ username: creds.username, password: '', confirmPassword: '' });
             }
         } catch (error) {
             console.error("Failed to load admin credentials", error);
@@ -68,20 +68,15 @@ export default function AdminSettingsPage() {
 
   const onSubmit = async (values: SettingsFormValues) => {
     try {
-       const docSnap = await getDoc(adminCredsDoc);
-       const currentCreds = docSnap.exists() ? docSnap.data() : {};
-       
-       const newCreds: any = {
+       const dataToUpdate: any = {
            username: values.username,
        };
-       // Hanya update password jika diisi
+       
        if (values.password) {
-           newCreds.password = values.password;
-       } else {
-           newCreds.password = currentCreds.password;
+           dataToUpdate.password = values.password;
        }
 
-       await setDoc(adminCredsDoc, newCreds);
+       await updateDoc(adminCredsDocRef, dataToUpdate);
 
        toast({
            title: "Pengaturan Disimpan",
