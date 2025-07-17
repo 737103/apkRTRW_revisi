@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FileText, Megaphone, ArrowRight } from "lucide-react";
-import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { rtdb } from "@/lib/firebase";
+import { ref, onValue, off, query, orderByChild, limitToLast } from "firebase/database";
 import {
   Dialog,
   DialogContent,
@@ -24,8 +24,7 @@ interface Announcement {
   id: string;
   title: string;
   content: string;
-  date: string;
-  createdAt: any;
+  timestamp: number;
 }
 
 export default function UserDashboardPage() {
@@ -35,30 +34,40 @@ export default function UserDashboardPage() {
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
 
     useEffect(() => {
-        const fetchData = async () => {
-            setIsLoading(true);
-            try {
-                const loggedInUserStr = localStorage.getItem(LOGGED_IN_USER_KEY);
-                if (loggedInUserStr) {
-                    const loggedInUser = JSON.parse(loggedInUserStr);
-                    setUserName(loggedInUser.fullName || 'Pengguna');
-                }
-
-                const announcementsCollection = collection(db, "announcements");
-                const q = query(announcementsCollection, orderBy("createdAt", "desc"), limit(3));
-                const querySnapshot = await getDocs(q);
-                const announcementsData = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                })) as Announcement[];
-                setAnnouncements(announcementsData);
-            } catch (error) {
-                console.error("Failed to load data from localStorage or Firestore", error);
-            } finally {
-                setIsLoading(false);
+        setIsLoading(true);
+        // Set user name from localStorage
+        try {
+            const loggedInUserStr = localStorage.getItem(LOGGED_IN_USER_KEY);
+            if (loggedInUserStr) {
+                const loggedInUser = JSON.parse(loggedInUserStr);
+                setUserName(loggedInUser.fullName || 'Pengguna');
             }
+        } catch (error) {
+            console.error("Failed to load user data from localStorage", error);
+        }
+
+        // Fetch announcements from Realtime Database
+        const announcementsRef = ref(rtdb, "announcements");
+        const announcementsQuery = query(announcementsRef, orderByChild("timestamp"), limitToLast(3));
+        
+        const listener = onValue(announcementsQuery, (snapshot) => {
+            const data = snapshot.val();
+            const announcementsData: Announcement[] = [];
+            if(data) {
+                for (const key in data) {
+                    announcementsData.push({ id: key, ...data[key] });
+                }
+            }
+            setAnnouncements(announcementsData.sort((a, b) => b.timestamp - a.timestamp));
+            setIsLoading(false);
+        }, (error) => {
+            console.error("Failed to load announcements from RTDB", error);
+            setIsLoading(false);
+        });
+
+        return () => {
+            off(announcementsRef, 'value', listener);
         };
-        fetchData();
     }, []);
 
     const handleAnnouncementClick = (announcement: Announcement) => {
@@ -68,6 +77,16 @@ export default function UserDashboardPage() {
     const handleDialogClose = () => {
       setSelectedAnnouncement(null);
     }
+    
+    const formatDate = (timestamp: number) => {
+        return new Date(timestamp).toLocaleDateString('id-ID', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+    };
 
     return (
         <div className="space-y-6 animate-in fade-in-50">
@@ -121,7 +140,7 @@ export default function UserDashboardPage() {
                                     >
                                         <h3 className="font-semibold">{ann.title}</h3>
                                         <p className="text-sm text-muted-foreground mt-1 truncate">{ann.content}</p>
-                                        <p className="text-xs text-muted-foreground/80 mt-2">{ann.date || 'Tanggal tidak tersedia'}</p>
+                                        <p className="text-xs text-muted-foreground/80 mt-2">{ann.timestamp ? formatDate(ann.timestamp) : 'Tanggal tidak tersedia'}</p>
                                     </div>
                                 ))}
                             </div>
@@ -142,7 +161,7 @@ export default function UserDashboardPage() {
                    <DialogHeader>
                       <DialogTitle>{selectedAnnouncement.title}</DialogTitle>
                       <DialogDescription>
-                        Diterbitkan pada: {selectedAnnouncement.date || 'Tanggal tidak tersedia'}
+                        Diterbitkan pada: {selectedAnnouncement.timestamp ? formatDate(selectedAnnouncement.timestamp) : 'Tanggal tidak tersedia'}
                       </DialogDescription>
                     </DialogHeader>
                     <div className="py-4 max-h-[60vh] overflow-y-auto pr-4">
