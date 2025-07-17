@@ -1,5 +1,6 @@
 {
   "firebase_hosting": {
     "deploymentHostingUrl": "https://aplikasirtrw-nuwr3.web.app"
-  }
+  },
+  "cloud_run_deploy": {}
 }

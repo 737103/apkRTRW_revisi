@@ -1,11 +1,10 @@
-
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react"; // Import Suspense
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
@@ -254,140 +253,159 @@ export default function ReportSubmissionPage() {
     }
 
     return (
-        <div className="animate-in fade-in-50">
-            <Card className="max-w-3xl mx-auto shadow-lg">
-                <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <FileText className="h-6 w-6 text-primary"/>
-                      <CardTitle className="text-2xl">{isEditMode ? 'Edit Laporan Kinerja' : 'Kirim Laporan Kinerja'}</CardTitle>
-                    </div>
-                    <CardDescription>{isEditMode ? 'Perbarui detail laporan Anda di bawah ini. Laporan yang diperbarui akan ditinjau kembali oleh admin.' : 'Isi formulir di bawah ini untuk mengirimkan laporan Anda. Harap berikan detail selengkap mungkin.'}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                             <div className="grid md:grid-cols-2 gap-6">
-                                <FormField
+        <Suspense fallback={<div>Loading...</div>}>
+            <div className="animate-in fade-in-50">
+                <Card className="max-w-3xl mx-auto shadow-lg">
+                    <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <FileText className="h-6 w-6 text-primary"/>
+                          <CardTitle className="text-2xl">{isEditMode ? 'Edit Laporan Kinerja' : 'Kirim Laporan Kinerja'}</CardTitle>
+                        </div>
+                        <CardDescription>{isEditMode ? 'Perbarui detail laporan Anda di bawah ini. Laporan yang diperbarui akan ditinjau kembali oleh admin.' : 'Isi formulir di bawah ini untuk mengirimkan laporan Anda. Harap berikan detail selengkap mungkin.'}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                                 <div className="grid md:grid-cols-2 gap-6">
+                                    <FormField
+                                        control={form.control}
+                                        name="namaLengkap"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Nama RT/RW</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="cth., Budi Santoso" {...field} readOnly className="bg-muted/50"/>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="jabatan"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Jabatan</FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} readOnly className="bg-muted/50"/>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="rt"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>RT</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="cth., 01" {...field} readOnly className="bg-muted/50"/>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="rw"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>RW</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="cth., 05" {...field} readOnly className="bg-muted/50" />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="jamDatang"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Jam Datang</FormLabel>
+                                                <FormControl>
+                                                    <Input type="time" {...field} readOnly className="bg-muted/50"/>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="jamPulang"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Jam Pulang</FormLabel>
+                                                <FormControl>
+                                                    <Input type="time" {...field} readOnly placeholder="Akan tercatat otomatis saat kirim" className="bg-muted/50 italic"/>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                 </div>
+                                 <FormField
                                     control={form.control}
-                                    name="namaLengkap"
+                                    name="jenisKegiatan"
                                     render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Nama RT/RW</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="cth., Budi Santoso" {...field} readOnly className="bg-muted/50"/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
+                                    <FormItem>
+                                        <FormLabel>Jenis Kegiatan</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                        <FormControl>
+                                            <div className="relative">
+                                                <Activity className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                <SelectTrigger className="pl-10">
+                                                    <SelectValue placeholder="Pilih jenis kegiatan" />
+                                                </SelectTrigger>
+                                            </div>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="kerja bakti">Kerja Bakti</SelectItem>
+                                            <SelectItem value="posko kontainer">Posko Kontainer</SelectItem>
+                                            <SelectItem value="majelis taklim">Majelis Taklim</SelectItem>
+                                            <SelectItem value="bank sampah">Bank Sampah</SelectItem>
+                                            <SelectItem value="pantau keamanan">Pantau Keamanan</SelectItem>
+                                            <SelectItem value="sigap bencana">Sigap Bencana</SelectItem>
+                                            <SelectItem value="retribusi sampah">Retribusi Sampah</SelectItem>
+                                            <SelectItem value="PBB">PBB</SelectItem>
+                                            <SelectItem value="lainnya">Lainnya</SelectItem>
+                                        </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
                                     )}
                                 />
-                                <FormField
-                                    control={form.control}
-                                    name="jabatan"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Jabatan</FormLabel>
-                                            <FormControl>
-                                                <Input {...field} readOnly className="bg-muted/50"/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="rt"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>RT</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="cth., 01" {...field} readOnly className="bg-muted/50"/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="rw"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>RW</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="cth., 05" {...field} readOnly className="bg-muted/50" />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="jamDatang"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Jam Datang</FormLabel>
-                                            <FormControl>
-                                                <Input type="time" {...field} readOnly className="bg-muted/50"/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="jamPulang"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Jam Pulang</FormLabel>
-                                            <FormControl>
-                                                <Input type="time" {...field} readOnly placeholder="Akan tercatat otomatis saat kirim" className="bg-muted/50 italic"/>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                             </div>
-                             <FormField
-                                control={form.control}
-                                name="jenisKegiatan"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Jenis Kegiatan</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                                    <FormControl>
-                                        <div className="relative">
-                                            <Activity className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                            <SelectTrigger className="pl-10">
-                                                <SelectValue placeholder="Pilih jenis kegiatan" />
-                                            </SelectTrigger>
-                                        </div>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="kerja bakti">Kerja Bakti</SelectItem>
-                                        <SelectItem value="posko kontainer">Posko Kontainer</SelectItem>
-                                        <SelectItem value="majelis taklim">Majelis Taklim</SelectItem>
-                                        <SelectItem value="bank sampah">Bank Sampah</SelectItem>
-                                        <SelectItem value="pantau keamanan">Pantau Keamanan</SelectItem>
-                                        <SelectItem value="sigap bencana">Sigap Bencana</SelectItem>
-                                        <SelectItem value="retribusi sampah">Retribusi Sampah</SelectItem>
-                                        <SelectItem value="PBB">PBB</SelectItem>
-                                        <SelectItem value="lainnya">Lainnya</SelectItem>
-                                    </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
+                                {jenisKegiatan === 'lainnya' && (
+                                    <FormField
+                                        control={form.control}
+                                        name="deskripsiLainnya"
+                                        render={({ field }) => (
+                                            <FormItem className="animate-in fade-in-50">
+                                                <FormLabel>Jelaskan kegiatan lainnya</FormLabel>
+                                                <FormControl>
+                                                    <Textarea
+                                                        placeholder="Jelaskan kegiatan lainnya yang dilakukan..."
+                                                        className="min-h-[100px]"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
                                 )}
-                            />
-                            {jenisKegiatan === 'lainnya' && (
-                                <FormField
+                                 <FormField
                                     control={form.control}
-                                    name="deskripsiLainnya"
+                                    name="deskripsiKegiatan"
                                     render={({ field }) => (
-                                        <FormItem className="animate-in fade-in-50">
-                                            <FormLabel>Jelaskan kegiatan lainnya</FormLabel>
+                                        <FormItem>
+                                            <FormLabel>Deskripsi Kegiatan</FormLabel>
                                             <FormControl>
                                                 <Textarea
-                                                    placeholder="Jelaskan kegiatan lainnya yang dilakukan..."
-                                                    className="min-h-[100px]"
+                                                    placeholder="Jelaskan kegiatan yang dilakukan..."
+                                                    className="min-h-[120px]"
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -395,99 +413,82 @@ export default function ReportSubmissionPage() {
                                         </FormItem>
                                     )}
                                 />
-                            )}
-                             <FormField
-                                control={form.control}
-                                name="deskripsiKegiatan"
-                                render={({ field }) => (
+                                 <FormField
+                                    control={form.control}
+                                    name="alamatKegiatan"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Alamat Kegiatan</FormLabel>
+                                            <FormControl>
+                                                <Textarea
+                                                    placeholder="Masukkan alamat lengkap lokasi kegiatan..."
+                                                    className="min-h-[80px]"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                 <FormField
+                                    control={form.control}
+                                    name="lokasiKegiatan"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Lokasi Kegiatan (GPS)</FormLabel>
+                                            <FormControl>
+                                                <div className="relative">
+                                                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                    <Input {...field} readOnly className="bg-muted/50 pl-10" />
+                                                </div>
+                                            </FormControl>
+                                            {locationError && <FormDescription className="text-destructive">{locationError}</FormDescription>}
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="fotoKegiatan"
+                                    render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Deskripsi Kegiatan</FormLabel>
+                                        <FormLabel>Upload Foto Kegiatan</FormLabel>
                                         <FormControl>
-                                            <Textarea
-                                                placeholder="Jelaskan kegiatan yang dilakukan..."
-                                                className="min-h-[120px]"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                             <FormField
-                                control={form.control}
-                                name="alamatKegiatan"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Alamat Kegiatan</FormLabel>
-                                        <FormControl>
-                                            <Textarea
-                                                placeholder="Masukkan alamat lengkap lokasi kegiatan..."
-                                                className="min-h-[80px]"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                             <FormField
-                                control={form.control}
-                                name="lokasiKegiatan"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Lokasi Kegiatan (GPS)</FormLabel>
-                                        <FormControl>
-                                            <div className="relative">
-                                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                <Input {...field} readOnly className="bg-muted/50 pl-10" />
+                                            <div className="flex items-center gap-4">
+                                                <Input 
+                                                    id="foto-kegiatan" 
+                                                    type="file" 
+                                                    accept="image/*" 
+                                                    className="hidden"
+                                                    onChange={handleFileChange}
+                                                />
+                                                <label 
+                                                    htmlFor="foto-kegiatan"
+                                                    className="cursor-pointer inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 px-4 py-2"
+                                                >
+                                                    <Camera className="h-4 w-4"/>
+                                                    {isEditMode ? 'Ganti Foto' : 'Pilih Foto'}
+                                                </label>
                                             </div>
                                         </FormControl>
-                                        {locationError && <FormDescription className="text-destructive">{locationError}</FormDescription>}
+                                        {preview && (
+                                            <div className="mt-4">
+                                                <Image src={preview} alt="Pratinjau Foto Kegiatan" width={200} height={200} className="rounded-md object-cover" />
+                                            </div>
+                                        )}
                                         <FormMessage />
                                     </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="fotoKegiatan"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Upload Foto Kegiatan</FormLabel>
-                                    <FormControl>
-                                        <div className="flex items-center gap-4">
-                                            <Input 
-                                                id="foto-kegiatan" 
-                                                type="file" 
-                                                accept="image/*" 
-                                                className="hidden"
-                                                onChange={handleFileChange}
-                                            />
-                                            <label 
-                                                htmlFor="foto-kegiatan"
-                                                className="cursor-pointer inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 px-4 py-2"
-                                            >
-                                                <Camera className="h-4 w-4"/>
-                                                {isEditMode ? 'Ganti Foto' : 'Pilih Foto'}
-                                            </label>
-                                        </div>
-                                    </FormControl>
-                                    {preview && (
-                                        <div className="mt-4">
-                                            <Image src={preview} alt="Pratinjau Foto Kegiatan" width={200} height={200} className="rounded-md object-cover" />
-                                        </div>
                                     )}
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
-                            <div className="flex gap-2">
-                                <Button type="submit" disabled={!form.formState.isValid}>{isEditMode ? 'Simpan Perubahan' : 'Kirim Laporan'}</Button>
-                                <Button type="button" variant="outline" onClick={() => router.back()}>Batal</Button>
-                            </div>
-                        </form>
-                    </Form>
-                </CardContent>
-            </Card>
-        </div>
+                                />
+                                <div className="flex gap-2">
+                                    <Button type="submit" disabled={!form.formState.isValid}>{isEditMode ? 'Simpan Perubahan' : 'Kirim Laporan'}</Button>
+                                    <Button type="button" variant="outline" onClick={() => router.back()}>Batal</Button>
+                                </div>
+                            </form>
+                        </Form>
+                    </CardContent>
+                </Card>
+            </div>
+        </Suspense>
     );
 }
