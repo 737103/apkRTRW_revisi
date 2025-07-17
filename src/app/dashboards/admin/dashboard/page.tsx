@@ -46,6 +46,7 @@ export default function AdminDashboardPage() {
   const [userCount, setUserCount] = useState(0);
   const [announcementCount, setAnnouncementCount] = useState(0);
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [noteContent, setNoteContent] = useState("");
   const { toast } = useToast();
 
@@ -81,11 +82,19 @@ export default function AdminDashboardPage() {
     fetchDashboardData();
   }, []);
   
-  const handleDialogClose = () => {
-    setSelectedReport(null);
+  const handleNoteDialogClose = () => {
     setIsNoteDialogOpen(false);
     setNoteContent("");
+    // We don't reset selectedReport here so that the main dialog remains open
   };
+  
+  const handleDetailDialogChange = (isOpen: boolean) => {
+    if (!isOpen) {
+        setSelectedReport(null);
+    }
+    setIsDetailDialogOpen(isOpen);
+  };
+
 
   const updateReportStatus = async (reportId: string, status: ReportStatus) => {
     try {
@@ -125,7 +134,7 @@ export default function AdminDashboardPage() {
             title: "Catatan Disimpan",
             description: "Catatan untuk laporan telah berhasil disimpan.",
         });
-        setIsNoteDialogOpen(false);
+        handleNoteDialogClose();
     } catch(error) {
         console.error("Failed to save note", error);
         toast({
@@ -163,6 +172,11 @@ export default function AdminDashboardPage() {
         });
     }
   }
+  
+  const handleViewReportClick = (report: Report) => {
+    setSelectedReport(report);
+    setIsDetailDialogOpen(true);
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in-50">
@@ -248,129 +262,20 @@ export default function AdminDashboardPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Dialog onOpenChange={(isOpen) => !isOpen && handleDialogClose()}>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                             <DialogTrigger asChild>
-                                <Button variant="ghost" size="icon" onClick={() => setSelectedReport(report)}>
-                                  <Eye className="h-4 w-4" />
-                                  <span className="sr-only">Lihat Detail</span>
-                                </Button>
-                              </DialogTrigger>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Lihat Detail Laporan</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      {selectedReport && selectedReport.id === report.id && (
-                        <DialogContent className="max-w-2xl">
-                          <DialogHeader>
-                            <DialogTitle>Detail Laporan - {selectedReport.namaLengkap}</DialogTitle>
-                            <DialogDescription>
-                              Dikirim pada {selectedReport.submissionDate} - RT {selectedReport.rt}/RW {selectedReport.rw}
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
-                             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium text-muted-foreground">Jabatan</p>
-                                    <p className="font-semibold">{selectedReport.jabatan}</p>
-                                </div>
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium text-muted-foreground">Jenis Kegiatan</p>
-                                    <p className="font-semibold capitalize">{selectedReport.jenisKegiatan}{selectedReport.jenisKegiatan === 'lainnya' && selectedReport.deskripsiLainnya ? `: ${selectedReport.deskripsiLainnya}` : ''}</p>
-                                </div>
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium text-muted-foreground">Jam Datang</p>
-                                    <p className="font-semibold">{selectedReport.jamDatang}</p>
-                                </div>
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium text-muted-foreground">Jam Pulang</p>
-                                    <p className="font-semibold">{selectedReport.jamPulang}</p>
-                                </div>
-                             </div>
-                             <div className="space-y-1 mt-4">
-                                <p className="text-sm font-medium text-muted-foreground">Deskripsi Kegiatan</p>
-                                <p>{selectedReport.deskripsiKegiatan}</p>
-                            </div>
-                            <div className="space-y-1 mt-4">
-                                <p className="text-sm font-medium text-muted-foreground">Alamat Kegiatan</p>
-                                <p>{selectedReport.alamatKegiatan}</p>
-                            </div>
-                            <div className="space-y-1 mt-4">
-                                <p className="text-sm font-medium text-muted-foreground">Lokasi GPS</p>
-                                <p className="text-sm text-blue-500 hover:underline">
-                                  <a href={`https://www.google.com/maps/search/?api=1&query=${selectedReport.lokasiKegiatan}`} target="_blank" rel="noopener noreferrer">
-                                    {selectedReport.lokasiKegiatan}
-                                  </a>
-                                </p>
-                            </div>
-                             <div className="space-y-1 mt-4">
-                                <p className="text-sm font-medium text-muted-foreground">Foto Kegiatan</p>
-                                {selectedReport.fotoKegiatan ? (
-                                    <div className="mt-2">
-                                      <Image
-                                          src={selectedReport.fotoKegiatan}
-                                          alt="Foto Kegiatan"
-                                          width={500}
-                                          height={300}
-                                          className="rounded-md object-cover"
-                                      />
-                                    </div>
-                                ) : (
-                                    <p className="text-sm text-muted-foreground">Tidak ada foto dilampirkan.</p>
-                                )}
-                            </div>
-                            {selectedReport.notes && (
-                                <div className="space-y-1 mt-4 pt-4 border-t">
-                                    <p className="text-sm font-medium text-muted-foreground">Catatan dari Admin</p>
-                                    <p className="text-sm p-3 bg-muted/50 rounded-md whitespace-pre-wrap">{selectedReport.notes}</p>
-                                </div>
-                            )}
-                          </div>
-                          <DialogFooter className="justify-between sm:justify-between items-center gap-2 flex-wrap pt-4 border-t">
-                            <div className="flex gap-2 flex-wrap">
-                                <Button variant="destructive" onClick={() => updateReportStatus(selectedReport.id, 'Ditolak')}>
-                                    <XCircle className="mr-2 h-4 w-4" /> Tolak
-                                </Button>
-                                <Button variant="default" className="bg-accent hover:bg-accent/90" onClick={() => updateReportStatus(selectedReport.id, 'Disetujui')}>
-                                    <Check className="mr-2 h-4 w-4" /> Setujui
-                                </Button>
-                                <Button variant="secondary" onClick={() => openNoteDialog(selectedReport)}>
-                                    <MessageSquarePlus className="mr-2 h-4 w-4" /> Catatan
-                                </Button>
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <Button variant="outline" className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/50">
-                                          <Trash2 className="mr-2 h-4 w-4" /> Hapus
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                        <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            Tindakan ini tidak dapat diurungkan. Ini akan menghapus laporan secara permanen.
-                                        </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                        <AlertDialogCancel>Batal</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => {
-                                            deleteReport(selectedReport.id);
-                                            handleDialogClose();
-                                        }} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            </div>
-                            <DialogClose asChild>
-                                <Button variant="outline">Tutup</Button>
-                            </DialogClose>
-                          </DialogFooter>
-                        </DialogContent>
-                      )}
-                    </Dialog>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                           <Button variant="ghost" size="icon" onClick={() => handleViewReportClick(report)}>
+                             <Eye className="h-4 w-4" />
+                             <span className="sr-only">Lihat Detail</span>
+                           </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Lihat Detail Laporan</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+
                     <AlertDialog>
                       <TooltipProvider>
                         <Tooltip>
@@ -380,11 +285,11 @@ export default function AdminDashboardPage() {
                                       <Trash2 className="h-4 w-4" />
                                       <span className="sr-only">Hapus</span>
                                   </Button>
-                              </AlertDialogTrigger>
+                              AlertDialogTrigger>
                           </TooltipTrigger>
                            <TooltipContent>
                               <p>Hapus Laporan</p>
-                           </TooltipContent>
+                           TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                       <AlertDialogContent>
@@ -409,7 +314,116 @@ export default function AdminDashboardPage() {
         </CardContent>
       </Card>
       
-      <Dialog open={isNoteDialogOpen} onOpenChange={(isOpen) => !isOpen && handleDialogClose()}>
+      {selectedReport && (
+          <Dialog open={isDetailDialogOpen} onOpenChange={handleDetailDialogChange}>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Detail Laporan - {selectedReport.namaLengkap}</DialogTitle>
+                  <DialogDescription>
+                    Dikirim pada {selectedReport.submissionDate} - RT {selectedReport.rt}/RW {selectedReport.rw}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
+                   <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                      <div className="space-y-1">
+                          <p className="text-sm font-medium text-muted-foreground">Jabatan</p>
+                          <p className="font-semibold">{selectedReport.jabatan}</p>
+                      </div>
+                      <div className="space-y-1">
+                          <p className="text-sm font-medium text-muted-foreground">Jenis Kegiatan</p>
+                          <p className="font-semibold capitalize">{selectedReport.jenisKegiatan}{selectedReport.jenisKegiatan === 'lainnya' && selectedReport.deskripsiLainnya ? `: ${selectedReport.deskripsiLainnya}` : ''}</p>
+                      </div>
+                      <div className="space-y-1">
+                          <p className="text-sm font-medium text-muted-foreground">Jam Datang</p>
+                          <p className="font-semibold">{selectedReport.jamDatang}</p>
+                      </div>
+                      <div className="space-y-1">
+                          <p className="text-sm font-medium text-muted-foreground">Jam Pulang</p>
+                          <p className="font-semibold">{selectedReport.jamPulang}</p>
+                      </div>
+                   </div>
+                   <div className="space-y-1 mt-4">
+                      <p className="text-sm font-medium text-muted-foreground">Deskripsi Kegiatan</p>
+                      <p>{selectedReport.deskripsiKegiatan}</p>
+                  </div>
+                  <div className="space-y-1 mt-4">
+                      <p className="text-sm font-medium text-muted-foreground">Alamat Kegiatan</p>
+                      <p>{selectedReport.alamatKegiatan}</p>
+                  </div>
+                  <div className="space-y-1 mt-4">
+                      <p className="text-sm font-medium text-muted-foreground">Lokasi GPS</p>
+                      <p className="text-sm text-blue-500 hover:underline">
+                        <a href={`https://www.google.com/maps/search/?api=1&query=${selectedReport.lokasiKegiatan}`} target="_blank" rel="noopener noreferrer">
+                          {selectedReport.lokasiKegiatan}
+                        </a>
+                      </p>
+                  </div>
+                   <div className="space-y-1 mt-4">
+                      <p className="text-sm font-medium text-muted-foreground">Foto Kegiatan</p>
+                      {selectedReport.fotoKegiatan ? (
+                          <div className="mt-2">
+                            <Image
+                                src={selectedReport.fotoKegiatan}
+                                alt="Foto Kegiatan"
+                                width={500}
+                                height={300}
+                                className="rounded-md object-cover"
+                            />
+                          </div>
+                      ) : (
+                          <p className="text-sm text-muted-foreground">Tidak ada foto dilampirkan.</p>
+                      )}
+                  </div>
+                  {selectedReport.notes && (
+                      <div className="space-y-1 mt-4 pt-4 border-t">
+                          <p className="text-sm font-medium text-muted-foreground">Catatan dari Admin</p>
+                          <p className="text-sm p-3 bg-muted/50 rounded-md whitespace-pre-wrap">{selectedReport.notes}</p>
+                      </div>
+                  )}
+                </div>
+                <DialogFooter className="justify-between sm:justify-between items-center gap-2 flex-wrap pt-4 border-t">
+                  <div className="flex gap-2 flex-wrap">
+                      <Button variant="destructive" onClick={() => updateReportStatus(selectedReport.id, 'Ditolak')}>
+                          <XCircle className="mr-2 h-4 w-4" /> Tolak
+                      </Button>
+                      <Button variant="default" className="bg-accent hover:bg-accent/90" onClick={() => updateReportStatus(selectedReport.id, 'Disetujui')}>
+                          <Check className="mr-2 h-4 w-4" /> Setujui
+                      </Button>
+                      <Button variant="secondary" onClick={() => openNoteDialog(selectedReport)}>
+                          <MessageSquarePlus className="mr-2 h-4 w-4" /> Catatan
+                      </Button>
+                      <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="outline" className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/50">
+                                <Trash2 className="mr-2 h-4 w-4" /> Hapus
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                              <AlertDialogHeader>
+                              <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                  Tindakan ini tidak dapat diurungkan. Ini akan menghapus laporan secara permanen.
+                              </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                              <AlertDialogCancel>Batal</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => {
+                                  deleteReport(selectedReport.id);
+                                  handleDetailDialogChange(false);
+                              }} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
+                              </AlertDialogFooter>
+                          </AlertDialogContent>
+                      </AlertDialog>
+                  </div>
+                  <DialogClose asChild>
+                      <Button variant="outline">Tutup</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+          </Dialog>
+      )}
+
+      <Dialog open={isNoteDialogOpen} onOpenChange={(isOpen) => !isOpen && handleNoteDialogClose()}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Tambah/Edit Catatan</DialogTitle>
@@ -432,7 +446,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsNoteDialogOpen(false)}>Batal</Button>
+            <Button type="button" variant="outline" onClick={() => handleNoteDialogClose()}>Batal</Button>
             <Button type="submit" onClick={handleSaveNote}>Simpan Catatan</Button>
           </DialogFooter>
         </DialogContent>

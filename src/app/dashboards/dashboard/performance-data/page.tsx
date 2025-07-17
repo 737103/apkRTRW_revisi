@@ -99,16 +99,24 @@ export default function PerformanceDataPage() {
   }
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return "Tanggal tidak tersedia";
     try {
-      return new Date(dateString).toLocaleDateString('id-ID', {
+      const date = new Date(dateString);
+      // Check if the date is valid
+      if (isNaN(date.getTime())) {
+        return "Tanggal tidak valid";
+      }
+      return date.toLocaleDateString('id-ID', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
       });
     } catch (e) {
-      return "Tanggal tidak valid";
+      console.error("Could not format date:", dateString, e);
+      return "Format tanggal salah";
     }
   };
+
 
   return (
     <div className="space-y-6 animate-in fade-in-50">
