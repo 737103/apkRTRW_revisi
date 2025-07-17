@@ -2,8 +2,8 @@
 {
   "rules": {
     "users": {
-      ".read": "auth != null || !data.exists()",
-      ".write": "auth != null || !data.exists()",
+      ".read": true,
+      ".write": true,
       ".indexOn": ["username", "userId"]
     },
     "reports": {
@@ -16,8 +16,8 @@
       ".write": "auth != null"
     },
     "config": {
-       ".read": "auth != null || !data.exists()",
-       ".write": "auth != null || !data.exists()"
+       ".read": true,
+       ".write": true
     }
   }
 }
