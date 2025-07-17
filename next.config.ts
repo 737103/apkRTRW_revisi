@@ -3,7 +3,6 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
-  output: 'export',
   typescript: {
     // Set to true to fail build on type errors
     // Good for production, but can be annoying in development
