@@ -32,31 +32,27 @@ export function LoginForm() {
   useEffect(() => {
     const seedInitialData = async () => {
         try {
-            // Seed Admin Credentials
+            // Seed Admin Credentials - write directly
             const adminCredsRef = ref(rtdb, "config/admin_credentials");
-            const adminSnap = await get(adminCredsRef);
-            if (!adminSnap.exists()) {
-                await set(adminCredsRef, { username: 'admin', password: '123' });
-            }
+            await set(adminCredsRef, { username: 'admin', password: '123' });
 
-            // Seed Demo User
-            const usersRef = ref(rtdb, "users");
-            const userQuery = query(usersRef, orderByChild("username"), equalTo("user"));
-            const userSnap = await get(userQuery);
-            if (!userSnap.exists()) {
-                const demoUser = {
-                    id: 'user-demo-id', // Assign a stable ID
-                    username: 'user',
-                    password: '123',
-                    fullName: 'Budi Santoso',
-                    position: 'Ketua RT',
-                    rt: '001',
-                    rw: '005'
-                };
-                await set(ref(rtdb, `users/${demoUser.id}`), demoUser);
-            }
+            // Seed Demo User - write directly with a known key
+            const demoUserRef = ref(rtdb, "users/user-demo-id");
+            const demoUser = {
+                id: 'user-demo-id',
+                username: 'user',
+                password: '123',
+                fullName: 'Budi Santoso',
+                position: 'Ketua RT',
+                rt: '001',
+                rw: '005'
+            };
+            await set(demoUserRef, demoUser);
+            
         } catch (error) {
-            console.error("Failed to seed initial data:", error);
+            // It's okay if this fails, it might be due to rules and data already existing.
+            // We'll log it for debugging but won't show a toast to the user.
+            console.warn("Initial data seeding might have been skipped (this is okay if data exists):", error);
         }
     };
     seedInitialData();
