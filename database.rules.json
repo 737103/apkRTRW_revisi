@@ -3,10 +3,8 @@
   "rules": {
     "users": {
       ".read": "auth != null",
-      "$uid": {
-        ".write": "auth != null && ($uid === auth.uid || root.child('config/admin_credentials/username').val() === 'admin')"
-      },
-       ".indexOn": ["username"]
+      ".write": "auth != null && root.child('config/admin_credentials/username').val() === 'admin'",
+      ".indexOn": ["username"]
     },
     "reports": {
       ".read": "auth != null",
