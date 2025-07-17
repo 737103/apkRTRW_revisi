@@ -32,27 +32,37 @@ export function LoginForm() {
   useEffect(() => {
     const seedInitialData = async () => {
         try {
-            // Seed Admin Credentials - write directly
+            // Seed Admin Credentials - check if exists before writing
             const adminCredsRef = ref(rtdb, "config/admin_credentials");
-            await set(adminCredsRef, { username: 'admin', password: '123' });
+            const adminSnap = await get(adminCredsRef);
+            if (!adminSnap.exists() || !adminSnap.val().username || !adminSnap.val().password) {
+                await set(adminCredsRef, { username: 'admin', password: '123' });
+                console.log("Admin credentials seeded.");
+            } else {
+                console.log("Admin credentials already exist, skipping seeding.");
+            }
 
-            // Seed Demo User - write directly with a known key
+            // Seed Demo User - check if exists before writing
             const demoUserRef = ref(rtdb, "users/user-demo-id");
-            const demoUser = {
-                id: 'user-demo-id',
-                username: 'user',
-                password: '123',
-                fullName: 'Budi Santoso',
-                position: 'Ketua RT',
-                rt: '001',
-                rw: '005'
-            };
-            await set(demoUserRef, demoUser);
+            const demoUserSnap = await get(demoUserRef);
+            if (!demoUserSnap.exists()) {
+                const demoUser = {
+                    id: 'user-demo-id',
+                    username: 'user',
+                    password: '123',
+                    fullName: 'Budi Santoso',
+                    position: 'Ketua RT',
+                    rt: '001',
+                    rw: '005'
+                };
+                await set(demoUserRef, demoUser);
+                console.log("Demo user seeded.");
+            } else {
+                console.log("Demo user already exists, skipping seeding.");
+            }
             
-        } catch (error) {
-            // It's okay if this fails, it might be due to rules and data already existing.
-            // We'll log it for debugging but won't show a toast to the user.
-            console.warn("Initial data seeding might have been skipped (this is okay if data exists):", error);
+        } catch (error: any) {
+            console.warn("Error during initial data seeding:", error.message || JSON.stringify(error));
         }
     };
     seedInitialData();
