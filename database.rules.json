@@ -12,12 +12,14 @@
       ".indexOn": ["userId", "submissionDate"]
     },
     "announcements": {
-      ".read": true,
+      ".read": "auth != null",
       ".write": "auth != null"
     },
     "config": {
-      ".read": true,
-      ".write": true
+      ".read": "auth != null",
+      ".write": "auth != null"
     }
   }
 }
+
+    

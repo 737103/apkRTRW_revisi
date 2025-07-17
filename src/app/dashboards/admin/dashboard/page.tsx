@@ -57,17 +57,24 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const listeners: (() => void)[] = [];
 
-    // Use a more specific query for reports to avoid permission issues
-    const reportsQuery = ref(rtdb, 'reports');
-    const reportsListener = onValue(reportsQuery, (snapshot) => {
+    // Use a simpler ref to fetch all reports, then sort on client.
+    // This is more robust if server-side indexes are not deployed.
+    const reportsListener = onValue(reportsRef, (snapshot) => {
         const data = snapshot.val();
         const reportsData: Report[] = [];
         if(data) {
             Object.keys(data).forEach(key => reportsData.push({ id: key, ...data[key] }));
         }
-        // Sort on the client-side to prevent permission issues with complex queries
+        // Sort on the client-side
         setReports(reportsData.sort((a,b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()));
-    }, (error) => console.error("Failed to load reports:", error));
+    }, (error) => {
+      console.error("Failed to load reports:", error);
+      toast({
+        title: "Gagal Memuat Laporan",
+        description: error.message,
+        variant: "destructive",
+      });
+    });
     listeners.push(() => off(reportsRef, 'value', reportsListener));
 
     const usersListener = onValue(usersRef, (snapshot) => {
@@ -437,3 +444,5 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
+    
