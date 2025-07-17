@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Building, LogIn, Shield, User } from 'lucide-react';
-import { collection, getDocs, query, where, doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, getDoc, setDoc, addDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 import { Button } from '@/components/ui/button';
