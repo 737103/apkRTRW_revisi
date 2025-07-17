@@ -2,9 +2,9 @@
 {
   "rules": {
     "users": {
-      ".read": "auth != null",
-      ".write": "data.child('username').val() === 'user' || auth != null",
-      ".indexOn": ["username"]
+      ".read": "auth != null || !data.exists()",
+      ".write": "auth != null || !data.exists()",
+      ".indexOn": ["username", "userId"]
     },
     "reports": {
       ".read": "auth != null",
@@ -16,8 +16,8 @@
       ".write": "auth != null"
     },
     "config": {
-       ".read": "auth != null",
-       ".write": "!data.exists() || auth != null"
+       ".read": "auth != null || !data.exists()",
+       ".write": "auth != null || !data.exists()"
     }
   }
 }
