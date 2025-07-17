@@ -16,8 +16,10 @@
       ".write": "auth != null"
     },
     "config": {
-       ".read": "auth != null",
-       ".write": "auth == null && !data.exists() || auth != null"
+      "admin_credentials": {
+        ".read": true,
+        ".write": "auth != null"
+      }
     }
   }
 }
