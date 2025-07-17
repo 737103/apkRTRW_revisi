@@ -57,8 +57,9 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const listeners: (() => void)[] = [];
 
-    // Fetch all reports and sort on the client side to avoid permission issues with un-indexed queries.
-    const reportsListener = onValue(reportsRef, (snapshot) => {
+    // Fetch the last 50 reports to avoid large data scans and permission issues.
+    const reportsQuery = query(reportsRef, orderByChild("submissionDate"), limitToLast(50));
+    const reportsListener = onValue(reportsQuery, (snapshot) => {
         const data = snapshot.val();
         const reportsData: Report[] = [];
         if(data) {
@@ -74,7 +75,7 @@ export default function AdminDashboardPage() {
         variant: "destructive",
       });
     });
-    listeners.push(() => off(reportsRef, 'value', reportsListener));
+    listeners.push(() => off(reportsQuery, 'value', reportsListener));
 
     const usersListener = onValue(usersRef, (snapshot) => {
         setUserCount(snapshot.size);
@@ -182,7 +183,7 @@ export default function AdminDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{reports.length}</div>
-              <p className="text-xs text-muted-foreground">Laporan yang telah dikirim</p>
+              <p className="text-xs text-muted-foreground">Laporan yang telah dikirim (terbaru)</p>
             </CardContent>
           </Card>
           <Card className="shadow-lg">
@@ -443,3 +444,5 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
+    
