@@ -54,6 +54,14 @@ export default function PerformanceDataPage() {
 
     try {
       setIsLoading(true);
+      const role = localStorage.getItem('rt-rw-role');
+
+      // Prevent this page from running logic for admins
+      if (role === 'admin') {
+        router.push('/dashboards/admin/dashboard');
+        return;
+      }
+
       const loggedInUserStr = localStorage.getItem(LOGGED_IN_USER_KEY);
       if(!loggedInUserStr) {
           toast({ title: "Sesi tidak ditemukan", description: "Silakan login kembali.", variant: "destructive"});
