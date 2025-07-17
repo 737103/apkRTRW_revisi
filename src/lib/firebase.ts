@@ -15,21 +15,17 @@ let storage: FirebaseStorage;
 
 if (typeof window !== 'undefined') {
   try {
-    // Your web app's Firebase configuration
-    // Moved inside the client-side check to ensure env vars are loaded.
-    const firebaseConfig = {
-      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-      appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
-    };
-    
-    app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-    auth = getAuth(app);
-    db = getFirestore(app);
-    storage = getStorage(app);
+    fetch('/firebase.json')
+      .then(response => response.json())
+      .then(firebaseConfig => {
+        app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+        auth = getAuth(app);
+        db = getFirestore(app);
+        storage = getStorage(app);
+      })
+      .catch(error => {
+        console.error("Could not load or initialize Firebase from config file.", error);
+      });
   } catch (error) {
     console.error("Firebase initialization error", error);
     // You might want to handle this error more gracefully
