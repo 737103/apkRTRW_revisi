@@ -65,6 +65,7 @@ export default function AdminDashboardPage() {
         if(data) {
             Object.keys(data).forEach(key => reportsData.push({ id: key, ...data[key] }));
         }
+        // Sort on the client-side to prevent permission issues with complex queries
         setReports(reportsData.sort((a,b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()));
     }, (error) => console.error("Failed to load reports:", error));
     listeners.push(() => off(reportsRef, 'value', reportsListener));
