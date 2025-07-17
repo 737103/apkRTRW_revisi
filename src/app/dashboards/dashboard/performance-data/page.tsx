@@ -74,32 +74,15 @@ export default function PerformanceDataPage() {
         );
         
         const querySnapshot = await getDocs(q);
-        const userReports: Report[] = querySnapshot.docs.map(doc => {
-          const data = doc.data() as DocumentData;
-          return {
+        const userReports = querySnapshot.docs.map(doc => ({
             id: doc.id,
-            userId: data.userId,
-            namaLengkap: data.namaLengkap,
-            rt: data.rt,
-            rw: data.rw,
-            jabatan: data.jabatan,
-            jamDatang: data.jamDatang,
-            jamPulang: data.jamPulang,
-            jenisKegiatan: data.jenisKegiatan,
-            deskripsiLainnya: data.deskripsiLainnya,
-            deskripsiKegiatan: data.deskripsiKegiatan,
-            alamatKegiatan: data.alamatKegiatan,
-            lokasiKegiatan: data.lokasiKegiatan,
-            fotoKegiatan: data.fotoKegiatan,
-            submissionDate: data.submissionDate,
-            status: data.status,
-            notes: data.notes
-          };
-        });
+            ...doc.data()
+        })) as Report[];
+
         setReports(userReports);
       } catch (error) {
           console.error("Failed to parse reports from Firestore", error);
-          toast({ title: "Gagal memuat laporan", variant: "destructive"});
+          toast({ title: "Gagal memuat laporan", description: "Terjadi kesalahan saat mengambil data dari server.", variant: "destructive"});
       } finally {
         setIsLoading(false);
       }
@@ -114,6 +97,18 @@ export default function PerformanceDataPage() {
   const isEditable = (status: ReportStatus) => {
     return status === 'Tertunda' || status === 'Ditolak';
   }
+
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (e) {
+      return "Tanggal tidak valid";
+    }
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in-50">
@@ -151,7 +146,7 @@ export default function PerformanceDataPage() {
               {reports.map((report) => (
                 <TableRow key={report.id} className="hover:bg-muted/50">
                   <TableCell className="font-medium capitalize">{report.jenisKegiatan}{report.jenisKegiatan === 'lainnya' && report.deskripsiLainnya ? `: ${report.deskripsiLainnya}` : ''}</TableCell>
-                  <TableCell>{new Date(report.submissionDate).toLocaleDateString('id-ID')}</TableCell>
+                  <TableCell>{formatDate(report.submissionDate)}</TableCell>
                   <TableCell>
                     <Badge variant={report.status === 'Tertunda' ? 'outline' : report.status === 'Disetujui' ? 'default' : 'destructive'} className={cn(
                         report.status === 'Tertunda' ? 'border-yellow-500/50 text-yellow-600' : 
@@ -201,7 +196,7 @@ export default function PerformanceDataPage() {
                           <DialogHeader>
                             <DialogTitle>Detail Laporan</DialogTitle>
                             <DialogDescription>
-                              Dikirim pada {new Date(selectedReport.submissionDate).toLocaleString('id-ID')}
+                              Dikirim pada {formatDate(selectedReport.submissionDate)}
                             </DialogDescription>
                           </DialogHeader>
                           <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
