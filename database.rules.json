@@ -1,10 +1,9 @@
-
 {
   "rules": {
     "users": {
       ".read": "auth != null",
       ".write": "auth == null && !data.exists() || auth != null",
-      ".indexOn": ["username", "userId"]
+      ".indexOn": ["username"]
     },
     "reports": {
       ".read": "auth != null",
