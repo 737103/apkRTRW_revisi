@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { rtdb } from "@/lib/firebase";
-import { ref, onValue, off, update, remove, set, query, orderByChild, limitToLast } from "firebase/database";
+import { ref, onValue, off, update, remove, query, orderByChild } from "firebase/database";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 
@@ -13,8 +13,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Eye, CheckCircle, Clock, Users, Megaphone, ArrowRight, XCircle, Check, FileText, MessageSquarePlus, Trash2, Calendar as CalendarIcon, Filter, X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Eye, CheckCircle, Clock, Users, Megaphone, ArrowRight, XCircle, Check, FileText, MessageSquarePlus, Trash2, Calendar as CalendarIcon, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
@@ -72,7 +72,7 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const listeners: (() => void)[] = [];
 
-    const reportsQuery = query(reportsRef, orderByChild("submissionDate"), limitToLast(100));
+    const reportsQuery = query(reportsRef, orderByChild("submissionDate"));
     const reportsListener = onValue(reportsQuery, (snapshot) => {
         const data = snapshot.val();
         const reportsData: Report[] = [];
@@ -84,7 +84,7 @@ export default function AdminDashboardPage() {
       console.error("Failed to load reports:", error);
       toast({
         title: "Gagal Memuat Laporan",
-        description: "Pastikan aturan database sudah di-deploy: firebase deploy --only database",
+        description: "Pastikan aturan database sudah benar dan Anda memiliki izin.",
         variant: "destructive",
       });
     });
@@ -210,7 +210,7 @@ export default function AdminDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{allReports.length}</div>
-              <p className="text-xs text-muted-foreground">Laporan yang telah dikirim (terbaru)</p>
+              <p className="text-xs text-muted-foreground">Laporan yang telah dikirim</p>
             </CardContent>
           </Card>
           <Card className="shadow-lg">
@@ -516,3 +516,5 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
+    
