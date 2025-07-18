@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { rtdb } from "@/lib/firebase";
-import { ref, onValue, off, update, remove, query, orderByChild } from "firebase/database";
+import { ref, onValue, off, update, remove, query } from "firebase/database";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 
@@ -72,7 +72,7 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const listeners: (() => void)[] = [];
 
-    const reportsQuery = query(reportsRef, orderByChild("submissionDate"));
+    const reportsQuery = query(reportsRef);
     const reportsListener = onValue(reportsQuery, (snapshot) => {
         const data = snapshot.val();
         const reportsData: Report[] = [];
@@ -267,12 +267,12 @@ export default function AdminDashboardPage() {
                     </PopoverContent>
                 </Popover>
 
-                <Select value={selectedActivity} onValueChange={setSelectedActivity}>
+                <Select value={selectedActivity} onValueChange={(value) => setSelectedActivity(value === 'all' ? '' : value)}>
                     <SelectTrigger className="w-[240px]">
                         <SelectValue placeholder="Semua Jenis Kegiatan" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="">Semua Jenis Kegiatan</SelectItem>
+                        <SelectItem value="all">Semua Jenis Kegiatan</SelectItem>
                         {activityTypes.map(type => (
                             <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
                         ))}
@@ -516,5 +516,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-    
