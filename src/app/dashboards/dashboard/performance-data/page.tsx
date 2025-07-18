@@ -1,16 +1,22 @@
 
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
+
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Eye, CheckCircle, Clock, XCircle, Pencil } from "lucide-react";
+import { Eye, CheckCircle, Clock, XCircle, Pencil, Calendar as CalendarIcon, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { rtdb } from "@/lib/firebase";
 import { ref, onValue, off, query, orderByChild, equalTo } from "firebase/database";
@@ -41,12 +47,21 @@ interface Report {
   notes?: string;
 }
 
+const activityTypes = [
+    "kerja bakti", "posko kontainer", "majelis taklim", "bank sampah", 
+    "pantau keamanan", "sigap bencana", "retribusi sampah", "PBB", "lainnya"
+];
+
 export default function PerformanceDataPage() {
-  const [reports, setReports] = useState<Report[]>([]);
+  const [allReports, setAllReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const { toast } = useToast();
+
+  // Filter states
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedActivity, setSelectedActivity] = useState<string>("");
 
   useEffect(() => {
     let listener: any;
@@ -56,7 +71,6 @@ export default function PerformanceDataPage() {
       setIsLoading(true);
       const role = localStorage.getItem('rt-rw-role');
 
-      // Prevent this page from running logic for admins
       if (role === 'admin') {
         router.push('/dashboards/admin/dashboard');
         return;
@@ -87,8 +101,7 @@ export default function PerformanceDataPage() {
                   userReports.push({ id: key, ...data[key] });
               });
           }
-          // Sort descending by submissionDate
-          setReports(userReports.sort((a, b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()));
+          setAllReports(userReports.sort((a, b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()));
           setIsLoading(false);
       }, (error) => {
           console.error("Failed to load reports from RTDB", error);
@@ -108,6 +121,20 @@ export default function PerformanceDataPage() {
         }
     };
   }, [router, toast]);
+
+  const filteredReports = useMemo(() => {
+    return allReports.filter(report => {
+        const reportDate = new Date(report.submissionDate);
+        const isDateMatch = selectedDate ? format(reportDate, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd') : true;
+        const isActivityMatch = selectedActivity ? report.jenisKegiatan === selectedActivity : true;
+        return isDateMatch && isActivityMatch;
+    });
+  }, [allReports, selectedDate, selectedActivity]);
+
+  const clearFilters = () => {
+    setSelectedDate(undefined);
+    setSelectedActivity("");
+  }
   
   const handleEditClick = (reportId: string) => {
     router.push(`/dashboards/dashboard/submit-report?edit=${reportId}`);
@@ -144,7 +171,50 @@ export default function PerformanceDataPage() {
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl">Riwayat Laporan</CardTitle>
-          <CardDescription>Berikut adalah semua laporan yang telah Anda kirimkan.</CardDescription>
+          <CardDescription>Berikut adalah semua laporan yang telah Anda kirimkan. Gunakan filter untuk mencari laporan spesifik.</CardDescription>
+          <div className="flex flex-wrap items-center gap-4 pt-4">
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                        variant={"outline"}
+                        className={cn(
+                            "w-[240px] justify-start text-left font-normal",
+                            !selectedDate && "text-muted-foreground"
+                        )}
+                        >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {selectedDate ? format(selectedDate, "PPP", { locale: id }) : <span>Pilih tanggal</span>}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={setSelectedDate}
+                        initialFocus
+                        />
+                    </PopoverContent>
+                </Popover>
+
+                <Select value={selectedActivity} onValueChange={(value) => setSelectedActivity(value === 'all' ? '' : value)}>
+                    <SelectTrigger className="w-[240px]">
+                        <SelectValue placeholder="Semua Jenis Kegiatan" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Semua Jenis Kegiatan</SelectItem>
+                        {activityTypes.map(type => (
+                            <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+
+                {(selectedDate || selectedActivity) && (
+                     <Button variant="ghost" onClick={clearFilters}>
+                        <X className="mr-2 h-4 w-4" />
+                        Hapus Filter
+                    </Button>
+                )}
+           </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -153,8 +223,10 @@ export default function PerformanceDataPage() {
                 <Skeleton className="h-12 w-full" />
                 <Skeleton className="h-12 w-full" />
             </div>
-          ) : reports.length === 0 ? (
-             <p className="text-muted-foreground text-center py-8">Anda belum mengirimkan laporan apapun.</p>
+          ) : filteredReports.length === 0 ? (
+             <p className="text-muted-foreground text-center py-8">
+                {allReports.length > 0 ? "Tidak ada laporan yang cocok dengan filter." : "Anda belum mengirimkan laporan apapun."}
+             </p>
           ) : (
           <Table>
             <TableHeader>
@@ -167,7 +239,7 @@ export default function PerformanceDataPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {reports.map((report) => (
+              {filteredReports.map((report) => (
                 <TableRow key={report.id} className="hover:bg-muted/50">
                   <TableCell className="font-medium capitalize">{report.jenisKegiatan}{report.jenisKegiatan === 'lainnya' && report.deskripsiLainnya ? `: ${report.deskripsiLainnya}` : ''}</TableCell>
                   <TableCell>{formatDate(report.submissionDate)}</TableCell>
@@ -307,3 +379,5 @@ export default function PerformanceDataPage() {
     </div>
   );
 }
+
+    
