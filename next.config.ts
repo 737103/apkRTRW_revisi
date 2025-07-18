@@ -2,6 +2,7 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
+  output: 'export',
   /* config options here */
   typescript: {
     // Set to true to fail build on type errors
@@ -14,6 +15,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: false,
   },
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
