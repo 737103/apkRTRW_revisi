@@ -36,7 +36,7 @@ export function LoginForm() {
             const adminCredsRef = ref(rtdb, "config/admin_credentials");
             const adminSnap = await get(adminCredsRef);
             if (!adminSnap.exists() || !adminSnap.val().username || !adminSnap.val().password) {
-                await set(adminCredsRef, { username: 'admin', password: '123' });
+                await set(adminCredsRef, { username: 'admin-rtrw', password: 'admin123' });
                 console.log("Admin credentials seeded.");
             } else {
                 console.log("Admin credentials already exist, skipping seeding.");
@@ -48,8 +48,8 @@ export function LoginForm() {
             if (!demoUserSnap.exists()) {
                 const demoUser = {
                     id: 'user-demo-id',
-                    username: 'user',
-                    password: '123',
+                    username: 'user-rtrw',
+                    password: 'user123',
                     fullName: 'Budi Santoso',
                     position: 'Ketua RT',
                     rt: '001',
