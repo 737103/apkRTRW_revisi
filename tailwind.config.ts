@@ -9,6 +9,9 @@ export default {
   ],
   theme: {
     extend: {
+      backgroundImage: {
+        'login-background': "url('/makassar-bg.jpg')",
+      },
       fontFamily: {
         body: ['var(--font-inter)', 'sans-serif'],
         headline: ['var(--font-inter)', 'sans-serif'],
