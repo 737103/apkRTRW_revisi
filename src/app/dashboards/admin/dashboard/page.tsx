@@ -1,24 +1,30 @@
 
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { rtdb } from "@/lib/firebase";
 import { ref, onValue, off, update, remove, set, query, orderByChild, limitToLast } from "firebase/database";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Eye, CheckCircle, Clock, Users, Megaphone, ArrowRight, XCircle, Check, FileText, MessageSquarePlus, Trash2 } from "lucide-react";
+import { Eye, CheckCircle, Clock, Users, Megaphone, ArrowRight, XCircle, Check, FileText, MessageSquarePlus, Trash2, Calendar as CalendarIcon, Filter, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 
 type ReportStatus = 'Tertunda' | 'Disetujui' | 'Ditolak';
 interface Report {
@@ -40,8 +46,13 @@ interface Report {
   notes?: string;
 }
 
+const activityTypes = [
+    "kerja bakti", "posko kontainer", "majelis taklim", "bank sampah", 
+    "pantau keamanan", "sigap bencana", "retribusi sampah", "PBB", "lainnya"
+];
+
 export default function AdminDashboardPage() {
-  const [reports, setReports] = useState<Report[]>([]);
+  const [allReports, setAllReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [userCount, setUserCount] = useState(0);
   const [announcementCount, setAnnouncementCount] = useState(0);
@@ -49,6 +60,10 @@ export default function AdminDashboardPage() {
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [noteContent, setNoteContent] = useState("");
   const { toast } = useToast();
+
+  // Filter states
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedActivity, setSelectedActivity] = useState<string>("");
   
   const reportsRef = ref(rtdb, "reports");
   const usersRef = ref(rtdb, "users");
@@ -57,16 +72,14 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const listeners: (() => void)[] = [];
 
-    // Fetch the last 50 reports ordered by submission date. This requires an index in RTDB rules.
-    const reportsQuery = query(reportsRef, orderByChild("submissionDate"), limitToLast(50));
+    const reportsQuery = query(reportsRef, orderByChild("submissionDate"), limitToLast(100));
     const reportsListener = onValue(reportsQuery, (snapshot) => {
         const data = snapshot.val();
         const reportsData: Report[] = [];
         if(data) {
             Object.keys(data).forEach(key => reportsData.push({ id: key, ...data[key] }));
         }
-        // Sort on the client-side to ensure descending order, as RTDB returns ascending.
-        setReports(reportsData.sort((a,b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()));
+        setAllReports(reportsData.sort((a,b) => new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()));
     }, (error) => {
       console.error("Failed to load reports:", error);
       toast({
@@ -92,6 +105,20 @@ export default function AdminDashboardPage() {
     }
   }, [toast]);
   
+  const filteredReports = useMemo(() => {
+    return allReports.filter(report => {
+        const reportDate = new Date(report.submissionDate);
+        const isDateMatch = selectedDate ? format(reportDate, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd') : true;
+        const isActivityMatch = selectedActivity ? report.jenisKegiatan === selectedActivity : true;
+        return isDateMatch && isActivityMatch;
+    });
+  }, [allReports, selectedDate, selectedActivity]);
+
+  const clearFilters = () => {
+    setSelectedDate(undefined);
+    setSelectedActivity("");
+  }
+
   const handleNoteDialogClose = () => {
     setIsNoteDialogOpen(false);
     setNoteContent("");
@@ -182,7 +209,7 @@ export default function AdminDashboardPage() {
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{reports.length}</div>
+              <div className="text-2xl font-bold">{allReports.length}</div>
               <p className="text-xs text-muted-foreground">Laporan yang telah dikirim (terbaru)</p>
             </CardContent>
           </Card>
@@ -215,11 +242,56 @@ export default function AdminDashboardPage() {
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl">Laporan Kinerja Terbaru</CardTitle>
-          <CardDescription>Tinjau dan kelola laporan yang dikirim oleh anggota RT/RW.</CardDescription>
+          <CardDescription>Tinjau dan kelola laporan yang dikirim oleh anggota RT/RW. Gunakan filter untuk mencari laporan spesifik.</CardDescription>
+           <div className="flex flex-wrap items-center gap-4 pt-4">
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                        variant={"outline"}
+                        className={cn(
+                            "w-[240px] justify-start text-left font-normal",
+                            !selectedDate && "text-muted-foreground"
+                        )}
+                        >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {selectedDate ? format(selectedDate, "PPP", { locale: id }) : <span>Pilih tanggal</span>}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={setSelectedDate}
+                        initialFocus
+                        />
+                    </PopoverContent>
+                </Popover>
+
+                <Select value={selectedActivity} onValueChange={setSelectedActivity}>
+                    <SelectTrigger className="w-[240px]">
+                        <SelectValue placeholder="Semua Jenis Kegiatan" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="">Semua Jenis Kegiatan</SelectItem>
+                        {activityTypes.map(type => (
+                            <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+
+                {(selectedDate || selectedActivity) && (
+                     <Button variant="ghost" onClick={clearFilters}>
+                        <X className="mr-2 h-4 w-4" />
+                        Hapus Filter
+                    </Button>
+                )}
+           </div>
         </CardHeader>
         <CardContent>
-          {reports.length === 0 ? (
-             <p className="text-muted-foreground text-center py-8">Belum ada laporan yang dikirim.</p>
+          {filteredReports.length === 0 ? (
+             <p className="text-muted-foreground text-center py-8">
+                {allReports.length > 0 ? "Tidak ada laporan yang cocok dengan filter." : "Belum ada laporan yang dikirim."}
+             </p>
           ) : (
           <Table>
             <TableHeader>
@@ -233,7 +305,7 @@ export default function AdminDashboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {reports.slice(0, 5).map((report) => (
+              {filteredReports.map((report) => (
                 <TableRow key={report.id} className="hover:bg-muted/50">
                   <TableCell className="font-medium">{report.namaLengkap}</TableCell>
                   <TableCell>{report.jabatan}</TableCell>

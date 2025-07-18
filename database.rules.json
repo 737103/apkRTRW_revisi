@@ -1,26 +1,22 @@
 
 {
   "rules": {
+    ".read": true,
+    ".write": true,
     "users": {
-      ".read": "auth != null",
-      ".write": true,
       "$uid": {
         ".write": "auth != null && auth.uid == $uid"
       },
       ".indexOn": "username"
     },
     "reports": {
-      ".read": "auth != null",
-      ".write": "auth != null",
       ".indexOn": ["userId", "submissionDate"]
     },
     "announcements": {
-      ".read": "auth != null",
-      ".write": "auth != null"
+      // No specific index for announcements needed based on current usage
     },
     "config": {
-      ".read": "auth != null",
-      ".write": true
+      // No specific index for config needed based on current usage
     }
   }
 }
