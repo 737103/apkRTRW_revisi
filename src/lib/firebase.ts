@@ -16,7 +16,7 @@ const firebaseConfig = {
   // that would be present in a Firebase project.
   // Replace with your actual project configuration
   apiKey: "AIzaSyBkfrvAGcJvLdhVNlHw8wOhuCrjgX1Pfyk",
-  authDomain: "aplikasirtrw-nuwr3.firebaseapp.com",
+  authDomain: "aplikasirtrw-nuwr3.web.app",
   projectId: "aplikasirtrw-nuwr3",
   storageBucket: "aplikasirtrw-nuwr3.appspot.com",
   messagingSenderId: "64245177816",
