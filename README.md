@@ -1,5 +1,4 @@
-
-clon# Aplikasi Penilaian Kinerja RT/RW
+# Aplikasi Penilaian Kinerja RT/RW
 
 Ini adalah aplikasi Next.js untuk melacak dan menilai kinerja pengurus RT dan RW.
 
@@ -15,10 +14,10 @@ Buka [http://localhost:3000](http://localhost:3000) di browser Anda untuk meliha
 
 ## Hosting di Firebase
 
-Aplikasi ini dikonfigurasi untuk di-deploy menggunakan Firebase App Hosting.
+Aplikasi ini dikonfigurasi untuk di-deploy menggunakan **Firebase Hosting**.
 
 1.  **Install Firebase CLI:**
-    Jika Anda belum menginstalnya, install Firebase CLI secara global dengan perintah:e
+    Jika Anda belum menginstalnya, install Firebase CLI secara global dengan perintah:
     ```bash
     npm install -g firebase-tools
     ```
@@ -30,15 +29,14 @@ Aplikasi ini dikonfigurasi untuk di-deploy menggunakan Firebase App Hosting.
     ```
 
 3.  **Inisialisasi Firebase (jika belum):**
-    Jika proyek ini belum terhubung dengan Firebase, jalankan perintah berikut di root direktori proyek Anda dan ikuti petunjuknya. Pastikan untuk memilih project Firebase yang benar.
+    Jika proyek ini belum terhubung dengan Firebase, jalankan perintah berikut di root direktori proyek Anda dan ikuti petunjuknya. Pastikan untuk memilih project Firebase yang benar dan mengaktifkan Firebase Hosting.
     ```bash
     firebase init
     ```
 
-4.  **Deploy ke App Hosting:**
+4.  **Deploy ke Firebase Hosting:**
     Untuk men-deploy aplikasi Anda ke web, jalankan perintah berikut:
     ```bash
-    firebase apphosting:backends:deploy
+    firebase deploy
     ```
     Perintah ini akan membangun aplikasi Next.js Anda untuk production dan men-deploy-nya. Setelah selesai, CLI akan memberikan Anda URL publik tempat aplikasi Anda dapat diakses.
-
