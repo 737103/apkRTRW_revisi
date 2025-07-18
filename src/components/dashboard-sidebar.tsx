@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, Users, Megaphone, Settings, Building, LogOut, FileText, User, PlusCircle } from 'lucide-react';
+import { Home, Users, Megaphone, Settings, Building, LogOut, FileText, User } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -52,8 +52,7 @@ export function DashboardSidebar() {
   const adminLinks = [
     { href: '/dashboards/admin/manage-users', label: 'Kelola Pengguna', icon: Users },
     { href: '/dashboards/admin/announcements', label: 'Kelola Pengumuman', icon: Megaphone },
-    { href: '/dashboards/admin/add-announcement', label: 'Tambah Pengumuman', icon: PlusCircle },
-    { href: '/dashboards/admin/settings', label: 'Pengaturan', icon: Settings },
+    { href: '/dashboards/admin/settings', label: 'Pengaturan Akun', icon: Settings },
   ];
 
   const userLinks = [
@@ -74,7 +73,7 @@ export function DashboardSidebar() {
     <aside className="hidden md:flex w-64 flex-col border-r bg-card p-4">
         <div className="flex items-center gap-3 mb-4 px-2">
             <Building className="h-8 w-8 text-primary" />
-            <h1 className="text-xl font-bold tracking-tight">Aplikasi Penilaian RT RW</h1>
+            <h1 className="text-xl font-bold tracking-tight">Aplikasi Kinerja</h1>
         </div>
         
         {userInfo && (
@@ -94,7 +93,7 @@ export function DashboardSidebar() {
             {navLinks.map((link) => (
                 <Button
                     key={link.label}
-                    variant={pathname === link.href ? 'secondary' : 'ghost'}
+                    variant={pathname.startsWith(link.href) ? 'secondary' : 'ghost'}
                     className="w-full justify-start text-base h-11"
                     asChild
                 >

@@ -20,6 +20,7 @@ export function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
   const [role, setRole] = useState('user');
+  const [loading, setLoading] = useState(false);
 
   // Admin states
   const [adminUsername, setAdminUsername] = useState('');
@@ -32,22 +33,19 @@ export function LoginForm() {
   useEffect(() => {
     const seedInitialData = async () => {
         try {
-            // Seed Admin Credentials - check if exists before writing
             const adminCredsRef = ref(rtdb, "config/admin_credentials");
             const adminSnap = await get(adminCredsRef);
-            if (!adminSnap.exists() || !adminSnap.val().username || !adminSnap.val().password) {
+            if (!adminSnap.exists()) {
                 await set(adminCredsRef, { username: 'admin-rtrw', password: 'admin123' });
                 console.log("Admin credentials seeded.");
-            } else {
-                console.log("Admin credentials already exist, skipping seeding.");
             }
 
-            // Seed Demo User - check if exists before writing
-            const demoUserRef = ref(rtdb, "users/user-demo-id");
-            const demoUserSnap = await get(demoUserRef);
-            if (!demoUserSnap.exists()) {
+            const usersRef = ref(rtdb, "users");
+            const userQuery = query(usersRef, orderByChild("username"), equalTo("user-rtrw"));
+            const userSnap = await get(userQuery);
+
+            if (!userSnap.exists()) {
                 const demoUser = {
-                    id: 'user-demo-id',
                     username: 'user-rtrw',
                     password: 'user123',
                     fullName: 'Budi Santoso',
@@ -55,14 +53,13 @@ export function LoginForm() {
                     rt: '001',
                     rw: '005'
                 };
-                await set(demoUserRef, demoUser);
+                const newUserRef = push(usersRef);
+                await set(newUserRef, { ...demoUser, id: newUserRef.key });
                 console.log("Demo user seeded.");
-            } else {
-                console.log("Demo user already exists, skipping seeding.");
             }
             
         } catch (error: any) {
-            console.warn("Error during initial data seeding:", error.message || JSON.stringify(error));
+            console.warn("Seeding skipped or failed:", error.message || JSON.stringify(error));
         }
     };
     seedInitialData();
@@ -70,6 +67,8 @@ export function LoginForm() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
         if (role === 'admin') {
             const adminCredsRef = ref(rtdb, "config/admin_credentials");
@@ -126,6 +125,8 @@ export function LoginForm() {
             description: "Gagal melakukan login. Silakan coba lagi.",
             variant: "destructive",
         });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -140,7 +141,8 @@ export function LoginForm() {
                     id={`${currentRole}-username`} 
                     type="text" 
                     placeholder="Masukkan username Anda" 
-                    required 
+                    required
+                    disabled={loading} 
                     value={isUser ? userUsername : adminUsername}
                     onChange={(e) => isUser ? setUserUsername(e.target.value) : setAdminUsername(e.target.value)}
                 />
@@ -151,14 +153,19 @@ export function LoginForm() {
                     id={`${currentRole}-password`} 
                     type="password" 
                     placeholder="••••••••" 
-                    required 
+                    required
+                    disabled={loading} 
                     value={isUser ? userPassword : adminPassword}
-                    onChange={(e) => isUser ? userPassword(e.target.value) : setAdminPassword(e.target.value)}
+                    onChange={(e) => isUser ? setUserPassword(e.target.value) : setAdminPassword(e.target.value)}
                 />
             </div>
-            <Button type="submit" className="w-full">
-                <LogIn className="mr-2 h-4 w-4" />
-                Masuk sebagai {currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}
+            <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? 'Memproses...' : (
+                    <>
+                        <LogIn className="mr-2 h-4 w-4" />
+                        Masuk sebagai {currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}
+                    </>
+                )}
             </Button>
         </form>
     )
@@ -176,7 +183,7 @@ export function LoginForm() {
       <CardContent>
         <Tabs defaultValue="user" onValueChange={setRole} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="user"><User className="mr-2 h-4 w-4"/> User</TabsTrigger>
+              <TabsTrigger value="user"><User className="mr-2 h-4 w-4"/> Pengguna</TabsTrigger>
               <TabsTrigger value="admin"><Shield className="mr-2 h-4 w-4"/> Admin</TabsTrigger>
           </TabsList>
           <TabsContent value="user">
