@@ -1,8 +1,5 @@
-
 {
   "hosting": {
-    "site": "aplikasirtrw-nuwr3",
-    "public": "public",
     "source": ".",
     "ignore": [
       "firebase.json",
