@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -40,7 +39,7 @@ export default function AddAnnouncementPage() {
       setContent('');
       toast({
         title: 'Sukses',
-        description: 'Pengumuman berhasil ditambahkan!',
+        description: 'Pengumuman berhasil ditambahkan.',
       });
     } catch (error) {
       console.error('Error adding announcement:', error);

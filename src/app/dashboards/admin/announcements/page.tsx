@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from "react";
@@ -23,7 +22,7 @@ const announcementSchema = z.object({
   id: z.string().optional(),
   title: z.string().min(5, { message: "Judul harus diisi (minimal 5 karakter)." }),
   content: z.string().min(10, { message: "Konten pengumuman harus diisi (minimal 10 karakter)." }),
-  timestamp: z.number().optional(),
+  timestamp: z.any().optional(),
 });
 
 type Announcement = {
@@ -52,11 +51,10 @@ export default function ManageAnnouncementsPage() {
                 announcementsData.push({ id: key, ...data[key] });
             }
         }
-        // Sort descending by timestamp
         setAnnouncements(announcementsData.sort((a, b) => b.timestamp - a.timestamp));
         setIsLoading(false);
     }, (error) => {
-        console.error("Failed to load announcements from RTDB", error);
+        console.error("Gagal memuat pengumuman dari RTDB", error);
         toast({
             title: "Gagal Memuat Data",
             description: "Tidak dapat memuat daftar pengumuman.",
@@ -104,7 +102,8 @@ export default function ManageAnnouncementsPage() {
         const announcementToUpdateRef = ref(rtdb, `announcements/${editingAnnouncement.id}`);
         await update(announcementToUpdateRef, {
             title: values.title,
-            content: values.content
+            content: values.content,
+            timestamp: serverTimestamp()
         });
         toast({
           title: "Pengumuman Diperbarui",
@@ -123,7 +122,7 @@ export default function ManageAnnouncementsPage() {
       }
       handleDialogOpenChange(false);
     } catch (error) {
-      console.error("Failed to save announcement", error);
+      console.error("Gagal menyimpan pengumuman", error);
       toast({
         title: "Gagal Menyimpan",
         description: "Terjadi kesalahan saat menyimpan data pengumuman.",
@@ -142,7 +141,7 @@ export default function ManageAnnouncementsPage() {
             variant: "default",
         });
     } catch (error) {
-        console.error("Failed to delete announcement", error);
+        console.error("Gagal menghapus pengumuman", error);
         toast({
             title: "Gagal Menghapus",
             description: "Terjadi kesalahan saat menghapus pengumuman.",
@@ -165,7 +164,7 @@ export default function ManageAnnouncementsPage() {
     <div className="space-y-6 animate-in fade-in-50">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight">Kelola Pengumuman</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Kelola Pengumuman</h1>
           <p className="text-lg text-muted-foreground">Buat, edit, dan hapus pengumuman untuk pengguna.</p>
         </div>
          <Button onClick={handleAddNewClick}>
@@ -240,7 +239,7 @@ export default function ManageAnnouncementsPage() {
                     <Card key={ann.id} className="bg-muted/30">
                         <CardHeader>
                             <CardTitle className="flex justify-between items-start">
-                                <span>{ann.title}</span>
+                                <span className="text-lg">{ann.title}</span>
                                 <div className="flex space-x-2">
                                      <Button variant="ghost" size="icon" onClick={() => handleEditClick(ann)}>
                                         <Pencil className="h-4 w-4" />
