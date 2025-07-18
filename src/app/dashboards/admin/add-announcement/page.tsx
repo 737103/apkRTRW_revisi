@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -7,16 +8,27 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { toast } from '@/components/ui/toast';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AddAnnouncementPage() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    if (!title || !content) {
+        toast({
+            title: 'Error',
+            description: 'Judul dan konten tidak boleh kosong.',
+            variant: 'destructive',
+        });
+        setLoading(false);
+        return;
+    }
 
     try {
       await push(ref(rtdb, 'announcements'), {
@@ -27,14 +39,14 @@ export default function AddAnnouncementPage() {
       setTitle('');
       setContent('');
       toast({
-        title: 'Success',
-        description: 'Announcement added successfully!',
+        title: 'Sukses',
+        description: 'Pengumuman berhasil ditambahkan!',
       });
     } catch (error) {
       console.error('Error adding announcement:', error);
       toast({
         title: 'Error',
-        description: 'Failed to add announcement. Please try again.',
+        description: 'Gagal menambahkan pengumuman. Silakan coba lagi.',
         variant: 'destructive',
       });
     } finally {
@@ -44,10 +56,10 @@ export default function AddAnnouncementPage() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Add New Announcement</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <h1 className="text-2xl font-bold mb-4">Tambah Pengumuman Baru</h1>
+      <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
         <div>
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title">Judul</Label>
           <Input
             id="title"
             type="text"
@@ -55,20 +67,23 @@ export default function AddAnnouncementPage() {
             onChange={(e) => setTitle(e.target.value)}
             required
             disabled={loading}
+            placeholder="cth., Rapat Warga Bulanan"
           />
         </div>
         <div>
-          <Label htmlFor="content">Content</Label>
+          <Label htmlFor="content">Konten</Label>
           <Textarea
             id="content"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             required
             disabled={loading}
+            placeholder="Tulis detail pengumuman di sini..."
+            className="min-h-[150px]"
           />
         </div>
         <Button type="submit" disabled={loading}>
-          {loading ? 'Adding...' : 'Add Announcement'}
+          {loading ? 'Menambahkan...' : 'Tambah Pengumuman'}
         </Button>
       </form>
     </div>
