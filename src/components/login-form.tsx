@@ -153,7 +153,7 @@ export function LoginForm() {
                     placeholder="••••••••" 
                     required 
                     value={isUser ? userPassword : adminPassword}
-                    onChange={(e) => isUser ? setUserPassword(e.target.value) : setAdminPassword(e.target.value)}
+                    onChange={(e) => isUser ? userPassword(e.target.value) : setAdminPassword(e.target.value)}
                 />
             </div>
             <Button type="submit" className="w-full">
