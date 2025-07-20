@@ -64,6 +64,7 @@ export default function AdminDashboardPage() {
   // Filter states
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedActivity, setSelectedActivity] = useState<string>("");
+  const [selectedUserName, setSelectedUserName] = useState<string>("");
   
   const reportsRef = ref(rtdb, "reports");
   const usersRef = ref(rtdb, "users");
@@ -105,18 +106,26 @@ export default function AdminDashboardPage() {
     }
   }, [toast]);
   
+  const uniqueUserNames = useMemo(() => {
+    const names = new Set<string>();
+    allReports.forEach(report => names.add(report.namaLengkap));
+    return Array.from(names).sort();
+  }, [allReports]);
+
   const filteredReports = useMemo(() => {
     return allReports.filter(report => {
         const reportDate = new Date(report.submissionDate);
         const isDateMatch = selectedDate ? format(reportDate, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd') : true;
         const isActivityMatch = selectedActivity ? report.jenisKegiatan === selectedActivity : true;
-        return isDateMatch && isActivityMatch;
+        const isUserNameMatch = selectedUserName ? report.namaLengkap === selectedUserName : true;
+        return isDateMatch && isActivityMatch && isUserNameMatch;
     });
-  }, [allReports, selectedDate, selectedActivity]);
+  }, [allReports, selectedDate, selectedActivity, selectedUserName]);
 
   const clearFilters = () => {
     setSelectedDate(undefined);
     setSelectedActivity("");
+    setSelectedUserName("");
   }
 
   const handleNoteDialogClose = () => {
@@ -279,7 +288,19 @@ export default function AdminDashboardPage() {
                     </SelectContent>
                 </Select>
 
-                {(selectedDate || selectedActivity) && (
+                <Select value={selectedUserName} onValueChange={(value) => setSelectedUserName(value === 'all' ? '' : value)}>
+                    <SelectTrigger className="w-[240px]">
+                        <SelectValue placeholder="Semua Nama Pengguna" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Semua Nama Pengguna</SelectItem>
+                        {uniqueUserNames.map(name => (
+                            <SelectItem key={name} value={name}>{name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+
+                {(selectedDate || selectedActivity || selectedUserName) && (
                      <Button variant="ghost" onClick={clearFilters}>
                         <X className="mr-2 h-4 w-4" />
                         Hapus Filter
