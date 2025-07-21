@@ -1,11 +1,11 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Building, LogIn, Shield, User } from 'lucide-react';
 import { rtdb } from "@/lib/firebase";
-import { ref, get, set, query, orderByChild, equalTo, push } from "firebase/database";
+import { ref, get, query, orderByChild, equalTo } from "firebase/database";
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,41 +29,6 @@ export function LoginForm() {
   // User states
   const [userUsername, setUserUsername] = useState('');
   const [userPassword, setUserPassword] = useState('');
-
-  useEffect(() => {
-    const seedInitialData = async () => {
-        try {
-            const adminCredsRef = ref(rtdb, "config/admin_credentials");
-            const adminSnap = await get(adminCredsRef);
-            if (!adminSnap.exists()) {
-                await set(adminCredsRef, { username: 'admin-rtrw', password: 'admin123' });
-                console.log("Admin credentials seeded.");
-            }
-
-            const usersRef = ref(rtdb, "users");
-            const userQuery = query(usersRef, orderByChild("username"), equalTo("user-rtrw"));
-            const userSnap = await get(userQuery);
-
-            if (!userSnap.exists()) {
-                const demoUser = {
-                    username: 'user-rtrw',
-                    password: 'user123',
-                    fullName: 'Budi Santoso',
-                    position: 'Ketua RT',
-                    rt: '001',
-                    rw: '005'
-                };
-                const newUserRef = push(usersRef);
-                await set(newUserRef, { ...demoUser, id: newUserRef.key });
-                console.log("Demo user seeded.");
-            }
-            
-        } catch (error: any) {
-            console.warn("Seeding skipped or failed:", error.message || JSON.stringify(error));
-        }
-    };
-    seedInitialData();
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
