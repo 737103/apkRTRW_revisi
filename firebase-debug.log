@@ -1,0 +1,36 @@
+[debug] [2025-07-21T09:27:38.767Z] ----------------------------------------------------------------------
+[debug] [2025-07-21T09:27:38.770Z] Command:       /nix/store/ws50yvm6vzlzf7jzz6n7xh4szddrack1-nodejs-20.19.1/bin/node /home/user/.global_modules/bin/firebase deploy
+[debug] [2025-07-21T09:27:38.771Z] CLI Version:   14.11.0
+[debug] [2025-07-21T09:27:38.771Z] Platform:      linux
+[debug] [2025-07-21T09:27:38.771Z] Node Version:  v20.19.1
+[debug] [2025-07-21T09:27:38.771Z] Time:          Mon Jul 21 2025 09:27:38 GMT+0000 (Coordinated Universal Time)
+[debug] [2025-07-21T09:27:38.772Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-07-21T09:27:39.246Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-21T09:27:39.247Z] > authorizing via signed-in user (barabarayaselatan96@gmail.com)
+[debug] [2025-07-21T09:27:39.247Z] [iam] checking project aplikasirtrw-nuwr3 for permissions ["firebase.projects.get","firebasedatabase.instances.update","firebasehosting.sites.update"]
+[debug] [2025-07-21T09:27:39.249Z] Checked if tokens are valid: true, expires at: 1753092463077
+[debug] [2025-07-21T09:27:39.249Z] Checked if tokens are valid: true, expires at: 1753092463077
+[debug] [2025-07-21T09:27:39.251Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/aplikasirtrw-nuwr3:testIamPermissions [none]
+[debug] [2025-07-21T09:27:39.251Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/aplikasirtrw-nuwr3:testIamPermissions x-goog-quota-user=projects/aplikasirtrw-nuwr3
+[debug] [2025-07-21T09:27:39.251Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/aplikasirtrw-nuwr3:testIamPermissions {"permissions":["firebase.projects.get","firebasedatabase.instances.update","firebasehosting.sites.update"]}
+[debug] [2025-07-21T09:27:40.101Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/aplikasirtrw-nuwr3:testIamPermissions 200
+[debug] [2025-07-21T09:27:40.102Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/aplikasirtrw-nuwr3:testIamPermissions {"permissions":["firebase.projects.get","firebasedatabase.instances.update","firebasehosting.sites.update"]}
+[debug] [2025-07-21T09:27:40.105Z] Checked if tokens are valid: true, expires at: 1753092463077
+[debug] [2025-07-21T09:27:40.105Z] Checked if tokens are valid: true, expires at: 1753092463077
+[debug] [2025-07-21T09:27:40.106Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/aplikasirtrw-nuwr3 [none]
+[debug] [2025-07-21T09:27:40.338Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/aplikasirtrw-nuwr3 200
+[debug] [2025-07-21T09:27:40.339Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/aplikasirtrw-nuwr3 {"projectId":"aplikasirtrw-nuwr3","projectNumber":"64245177816","displayName":"aplikasiRTRW","name":"projects/aplikasirtrw-nuwr3","resources":{"hostingSite":"aplikasirtrw-nuwr3","realtimeDatabaseInstance":"aplikasirtrw-nuwr3-default-rtdb"},"state":"ACTIVE","etag":"1_b793d842-f1e4-476e-a83a-cf12f42d8ce9"}
+[debug] [2025-07-21T09:27:40.340Z] Checked if tokens are valid: true, expires at: 1753092463077
+[debug] [2025-07-21T09:27:40.340Z] Checked if tokens are valid: true, expires at: 1753092463077
+[debug] [2025-07-21T09:27:40.341Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/aplikasirtrw-nuwr3 [none]
+[debug] [2025-07-21T09:27:40.514Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/aplikasirtrw-nuwr3 200
+[debug] [2025-07-21T09:27:40.514Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/aplikasirtrw-nuwr3 {"projectId":"aplikasirtrw-nuwr3","projectNumber":"64245177816","displayName":"aplikasiRTRW","name":"projects/aplikasirtrw-nuwr3","resources":{"hostingSite":"aplikasirtrw-nuwr3","realtimeDatabaseInstance":"aplikasirtrw-nuwr3-default-rtdb"},"state":"ACTIVE","etag":"1_b793d842-f1e4-476e-a83a-cf12f42d8ce9"}
+[debug] [2025-07-21T09:27:44.617Z] Checked if tokens are valid: true, expires at: 1753092463077
+[debug] [2025-07-21T09:27:44.618Z] Checked if tokens are valid: true, expires at: 1753092463077
+[debug] [2025-07-21T09:27:44.619Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/aplikasirtrw-nuwr3/sites pageToken=&pageSize=10
+[debug] [2025-07-21T09:27:45.048Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/aplikasirtrw-nuwr3/sites 200
+[debug] [2025-07-21T09:27:45.048Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/aplikasirtrw-nuwr3/sites {"sites":[{"name":"projects/aplikasirtrw-nuwr3/sites/aplikasirtrw-nuwr3","defaultUrl":"https://aplikasirtrw-nuwr3.web.app","appId":"1:64245177816:web:724c026756f4b2c6a0e6ad","type":"DEFAULT_SITE"}]}
+[debug] [2025-07-21T09:27:45.050Z] Checked if tokens are valid: true, expires at: 1753092463077
+[debug] [2025-07-21T09:27:45.051Z] Checked if tokens are valid: true, expires at: 1753092463077
+[debug] [2025-07-21T09:27:45.052Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:64245177816:web:724c026756f4b2c6a0e6ad/config [none]
